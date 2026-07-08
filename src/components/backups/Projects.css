@@ -1,0 +1,85 @@
+.constellation-content {
+  max-width: 640px;
+  margin-left: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 4rem;
+}
+
+.node-card {
+  opacity: 0;
+  transform: translateY(16px);
+  transition: opacity 0.6s var(--ease), transform 0.6s var(--ease);
+  scroll-margin-top: 2rem;
+}
+
+.node-card.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.node-problem {
+  font-family: var(--display);
+  font-style: italic;
+  font-size: 20px;
+  color: var(--text-2);
+  margin: 0 0 0.75rem;
+}
+
+.node-title {
+  font-family: var(--display);
+  font-size: 22px;
+  color: var(--text);
+  margin: 0 0 0.35rem;
+}
+
+.node-meta {
+  font-size: 13px;
+  color: var(--text-3);
+  margin: 0 0 1rem;
+}
+
+.node-desc {
+  font-size: 15px;
+  color: var(--text-2);
+  line-height: 1.7;
+  margin: 0 0 1.1rem;
+  max-width: 60ch;
+}
+
+.node-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-bottom: 1rem;
+}
+
+.node-links {
+  display: flex;
+  gap: 1.25rem;
+}
+
+.node-related {
+  margin-top: 1.5rem;
+  padding-top: 1.25rem;
+  border-top: 1px solid var(--border);
+}
+
+.node-related__item {
+  margin-bottom: 0.5rem;
+}
+
+.node-related__name {
+  font-family: var(--display);
+  font-size: 16px;
+  color: var(--text);
+  margin: 0 0 0.25rem;
+}
+
+.node-related__desc {
+  font-size: 13px;
+  color: var(--text-3);
+  line-height: 1.6;
+  margin: 0 0 0.6rem;
+  max-width: 55ch;
+}

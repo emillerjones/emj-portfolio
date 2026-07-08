@@ -1,0 +1,258 @@
+.constellation {
+  position: fixed;
+  left: 2.5rem;
+  top: calc(5vh + 50px);
+  width: 340px;
+  height: calc(90vh - 100px);
+  z-index: 40;
+  pointer-events: none;
+}
+
+@media (max-width: 1100px) {
+  .constellation {
+    display: none;
+  }
+}
+
+.constellation__chart {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.constellation__lines {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  overflow: visible;
+}
+
+.constellation__dust {
+  fill: rgba(210, 225, 245, 0.35);
+  animation: dust-twinkle 3.5s ease-in-out infinite;
+}
+
+.constellation__edge {
+  stroke: rgba(160, 190, 230, 0.18);
+  stroke-width: 0.25;
+  stroke-dasharray: 140;
+  stroke-dashoffset: 140;
+  transition: stroke-dashoffset 0.9s var(--ease), stroke 0.6s var(--ease);
+}
+
+.constellation__edge.is-drawn {
+  stroke-dashoffset: 0;
+  stroke: rgba(180, 205, 235, 0.4);
+}
+
+.constellation__edge.is-wave {
+  animation: edge-wave 0.6s var(--ease);
+}
+
+/* --- STARS --- */
+.constellation__star-btn {
+  position: absolute;
+  transform: translate(-50%, -50%);
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: none;
+  padding: 6px;
+  cursor: pointer;
+  pointer-events: auto;
+  font-family: var(--body);
+  animation: twinkle 3.4s ease-in-out infinite;
+}
+
+.constellation__star-btn.label-left {
+  flex-direction: row-reverse;
+}
+
+.constellation__star-btn.is-active {
+  animation: none;
+}
+
+.constellation__star-btn.is-wave {
+  animation: star-wave 0.6s var(--ease);
+}
+
+.constellation__dot-wrap {
+  position: relative;
+  width: 14px;
+  height: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.constellation__idle-ring {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 14px;
+  height: 14px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(190, 210, 235, 0.22);
+  transition: border-color 0.3s var(--ease);
+}
+
+.constellation__star-btn:hover .constellation__idle-ring {
+  border-color: rgba(200, 220, 245, 0.4);
+}
+
+.constellation__dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: rgba(215, 230, 245, 0.65);
+  transition: background 0.4s var(--ease), width 0.3s var(--ease), height 0.3s var(--ease);
+}
+
+.constellation__star-btn.is-active .constellation__dot {
+  width: 10px;
+  height: 10px;
+  background: #eaf2ff;
+}
+
+/* --- FINAL STAR: distinct shape, permanently larger --- */
+.constellation__star-icon {
+  width: 15px;
+  height: 15px;
+  fill: rgba(220, 233, 250, 0.7);
+  transition: fill 0.4s var(--ease), width 0.3s var(--ease), height 0.3s var(--ease);
+}
+
+.constellation__star-btn.is-final .constellation__idle-ring {
+  width: 22px;
+  height: 22px;
+  border-color: rgba(200, 220, 245, 0.35);
+}
+
+.constellation__star-btn.is-final.is-active .constellation__star-icon {
+  width: 22px;
+  height: 22px;
+  fill: #eef6ff;
+  filter: drop-shadow(0 0 8px rgba(190, 215, 245, 0.6));
+}
+
+.constellation__star-btn.is-final .constellation__label {
+  font-weight: 500;
+}
+
+/* --- Halo: the ongoing pulse while a star is active --- */
+.constellation__halo {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 20px;
+  height: 20px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1px solid rgba(160, 200, 240, 0.55);
+  animation: pulse-ring 2.2s var(--ease) infinite;
+  pointer-events: none;
+}
+
+.constellation__star-btn.is-final .constellation__halo {
+  border-color: rgba(200, 225, 250, 0.7);
+  animation: pulse-ring-final 2s var(--ease) infinite;
+}
+
+/* --- Arrival burst: fires specifically at the final star on arrival --- */
+.constellation__burst {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 22px;
+  height: 22px;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  border: 1.5px solid rgba(220, 235, 250, 0.85);
+  animation: arrival-burst 1s var(--ease) 2;
+  pointer-events: none;
+}
+
+.constellation__label {
+  font-size: 13px;
+  color: rgba(200, 215, 235, 0.5);
+  white-space: nowrap;
+  transition: color 0.3s var(--ease);
+}
+
+.constellation__edge-label {
+  position: absolute;
+  transform: translate(0, -50%);
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  pointer-events: none;
+  font-family: var(--body);
+  font-style: italic;
+}
+
+.constellation__edge-label-title {
+  font-size: 11px;
+  color: rgba(180, 200, 225, 0.4);
+  white-space: nowrap;
+}
+
+.constellation__edge-label-sub {
+  font-size: 10px;
+  color: rgba(160, 180, 205, 0.3);
+  white-space: nowrap;
+}
+
+.constellation__star-btn:hover .constellation__label,
+.constellation__star-btn.is-active .constellation__label {
+  color: #dbe8f7;
+}
+
+@keyframes twinkle {
+  0%, 100% { opacity: 0.55; }
+  50% { opacity: 1; }
+}
+
+@keyframes dust-twinkle {
+  0%, 100% { opacity: 0.2; }
+  50% { opacity: 0.6; }
+}
+
+@keyframes pulse-ring {
+  0% { width: 20px; height: 20px; opacity: 0.7; }
+  100% { width: 34px; height: 34px; opacity: 0; }
+}
+
+@keyframes pulse-ring-final {
+  0% { width: 22px; height: 22px; opacity: 0.8; }
+  100% { width: 46px; height: 46px; opacity: 0; }
+}
+
+@keyframes arrival-burst {
+  0% { width: 22px; height: 22px; opacity: 0.9; }
+  100% { width: 60px; height: 60px; opacity: 0; }
+}
+
+@keyframes star-wave {
+  0% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+  40% { transform: translate(-50%, -50%) scale(1.35); filter: brightness(1.8); }
+  100% { transform: translate(-50%, -50%) scale(1); filter: brightness(1); }
+}
+
+@keyframes edge-wave {
+  0% { stroke: rgba(180, 205, 235, 0.4); stroke-width: 0.25; }
+  40% { stroke: rgba(220, 235, 250, 0.9); stroke-width: 0.6; }
+  100% { stroke: rgba(180, 205, 235, 0.4); stroke-width: 0.25; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .constellation__star-btn,
+  .constellation__dust,
+  .constellation__halo,
+  .constellation__burst {
+    animation: none;
+  }
+}
