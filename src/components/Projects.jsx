@@ -187,15 +187,17 @@ function MobileStory({ chapters }) {
         ))}
       </div>
 
-      <a href="#contact" className="mobile-story__bookend mobile-story__bookend--final">
-        <span className="mobile-story__star is-final">
-          <StarIcon className="mobile-story__star-icon" />
-        </span>
-        <span>
-          <span className="mobile-story__eyebrow">The next chapter</span>
-          <span className="mobile-story__title">What's next</span>
-        </span>
-      </a>
+      <div className="mobile-story__arrival">
+        <a href="#contact" className="mobile-story__bookend mobile-story__bookend--final">
+          <span className="mobile-story__star is-final">
+            <StarIcon className="mobile-story__star-icon" />
+          </span>
+          <span>
+            <span className="mobile-story__eyebrow">The next chapter</span>
+            <span className="mobile-story__title">What's next</span>
+          </span>
+        </a>
+      </div>
     </section>
   );
 }
