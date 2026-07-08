@@ -28,7 +28,10 @@
 
 /* --- RESET ----------------------------------------------------- */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-html { scroll-behavior: smooth; }
+html {
+  scroll-behavior: smooth;
+  scroll-snap-type: y proximity;
+}
 body {
   background: var(--bg);
   color: var(--text);
@@ -41,6 +44,7 @@ body {
 img { display: block; max-width: 100%; }
 a { color: inherit; text-decoration: none; }
 ul { list-style: none; }
+main { position: relative; }
 
 /* --- SHARED ANIMATIONS ------------------------------------------ */
 .section-eyebrow {
@@ -151,27 +155,43 @@ ul { list-style: none; }
   margin: 0 auto;
 } */
  .hero {
-  min-height: 100vh;
+  position: relative;
+  min-height: 100svh;
   display: grid;
   grid-template-columns: 900px auto;
-  align-items: start;
+  align-items: center;
   /* gap: 60px; */
 
-  padding-top: calc(5vh + 10px);
+  padding-top: calc(5vh + 50px);
   padding-right: 6%;
-  padding-bottom: 80px;
+  padding-bottom: 9vh;
 
   /* fixed relationship to left star chart */
   padding-left: 425px;
 
   max-width: none;
   margin: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+  overflow: hidden;
+}
+.hero::after {
+  content: "";
+  position: absolute;
+  left: 425px;
+  right: 6%;
+  bottom: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(159, 195, 238, 0.35), transparent);
+  opacity: 0.65;
 }
 .hero-main {
   display: flex;
   flex-direction: column;
   gap: 24px;
   max-width: 900px;
+  position: relative;
+  z-index: 1;
 }
 .hero-eyebrow {
   font-size: 12px;
@@ -232,8 +252,49 @@ ul { list-style: none; }
   color: var(--accent);
 }
 
+.hero-scroll-cue {
+  width: fit-content;
+  display: grid;
+  grid-template-columns: 16px auto;
+  column-gap: 12px;
+  row-gap: 5px;
+  align-items: center;
+  color: var(--text-3);
+  margin-top: 1.5vh;
+  transition: color 0.25s var(--ease), transform 0.25s var(--ease);
+}
+.hero-scroll-cue:hover {
+  color: var(--accent-hover);
+  transform: translateY(2px);
+}
+.hero-scroll-cue__line {
+  grid-row: span 2;
+  justify-self: center;
+  width: 1px;
+  height: 54px;
+  background: linear-gradient(180deg, rgba(159, 195, 238, 0), rgba(159, 195, 238, 0.7));
+  transform-origin: top;
+  animation: scroll-line-draw 2.4s var(--ease) infinite;
+}
+.hero-scroll-cue__star {
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--accent);
+  box-shadow: 0 0 16px rgba(159, 195, 238, 0.75);
+  animation: scroll-star-pulse 2.4s var(--ease) infinite;
+}
+.hero-scroll-cue__text {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.8px;
+  text-transform: uppercase;
+}
+
 .hero-visual {
   width: min(340px, 30vw);
+  opacity: 0.75;
+  transform: translateY(-4vh);
 }
 .hero-visual__svg {
   width: 100%;
@@ -265,11 +326,23 @@ ul { list-style: none; }
   0%, 100% { r: 8; opacity: 0.8; }
   50% { r: 11; opacity: 1; }
 }
+@keyframes scroll-line-draw {
+  0%, 100% { transform: scaleY(0.45); opacity: 0.45; }
+  50% { transform: scaleY(1); opacity: 1; }
+}
+@keyframes scroll-star-pulse {
+  0%, 100% { transform: translateY(-4px) scale(0.9); opacity: 0.65; }
+  50% { transform: translateY(8px) scale(1.15); opacity: 1; }
+}
 
 @media (max-width: 1100px) {
   .hero {
     grid-template-columns: 1fr;
     padding-left: 6%;
+  }
+  .hero::after,
+  .about-section::before {
+    left: 6%;
   }
   .hero-visual {
     display: none;
@@ -286,9 +359,9 @@ ul { list-style: none; }
   margin: 0 auto;
 } */
  .section {
-  padding-top: 100px;
+  padding-top: 0;
   padding-right: 6%;
-  padding-bottom: 100px;
+  padding-bottom: 0;
   padding-left: 425px;
 
   max-width: none;
@@ -327,24 +400,41 @@ ul { list-style: none; }
   margin: 0 auto;
 } */
  .about-section {
-  padding-top: 100px;
+  position: relative;
+  min-height: 100svh;
+  display: flex;
+  align-items: center;
+  padding-top: 8vh;
   padding-right: 6%;
-  padding-bottom: 100px;
+  padding-bottom: 8vh;
   padding-left: 425px;
 
   max-width: none;
   margin: 0;
+  scroll-snap-align: start;
+  scroll-snap-stop: always;
+}
+.about-section::before {
+  content: "";
+  position: absolute;
+  left: 425px;
+  right: 6%;
+  top: 8vh;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(159, 195, 238, 0.34), transparent);
 }
 .about-inner {
   max-width: 900px;
+  position: relative;
 }
 .about-heading {
   font-family: var(--display);
-  font-size: clamp(28px, 3.5vw, 46px);
+  font-size: clamp(36px, 5vw, 68px);
   font-weight: 700;
-  line-height: 1.15;
+  line-height: 1.05;
   color: var(--text);
-  margin-bottom: 32px;
+  margin-bottom: 34px;
+  max-width: 780px;
   opacity: 0;
   transform: translateY(14px);
   transition: opacity 0.55s var(--ease) 0.08s, transform 0.55s var(--ease) 0.08s;
@@ -355,16 +445,30 @@ ul { list-style: none; }
   display: flex;
   flex-direction: column;
   gap: 18px;
-  margin-bottom: 32px;
+  margin-bottom: 36px;
+  max-width: 850px;
   opacity: 0;
   transform: translateY(10px);
   transition: opacity 0.55s var(--ease) 0.2s, transform 0.55s var(--ease) 0.2s;
 }
 .about-body.is-visible { opacity: 1; transform: translateY(0); }
 .about-body p {
-  font-size: 16px;
+  font-size: clamp(16px, 1.35vw, 19px);
   color: var(--text-2);
-  line-height: 1.8;
+  line-height: 1.78;
+}
+.about-thesis {
+  align-self: center;
+  width: min(100%, 680px);
+  padding: 1.15rem 0;
+  margin: 0.35rem 0;
+  font-family: var(--display);
+  font-size: clamp(24px, 3vw, 38px);
+  font-style: italic;
+  line-height: 1.18;
+  text-align: center;
+  color: var(--accent);
+  text-shadow: 0 0 18px rgba(159, 195, 238, 0.18);
 }
 .about-body em { font-style: italic; color: var(--text); }
 
@@ -434,16 +538,32 @@ ul { list-style: none; }
 }
 
 @media (max-width: 640px) {
-  .hero { padding: 110px 5% 60px; }
+  html {
+    scroll-snap-type: none;
+  }
+  .hero { padding: 96px 5% 56px; }
   .section,
   .section--alt,
   .about-section,
   .footer { padding-left: 5%; padding-right: 5%; }
+  .hero::after,
+  .about-section::before {
+    left: 5%;
+    right: 5%;
+  }
+  .hero-scroll-cue__line {
+    height: 42px;
+  }
 }
 
 @media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-snap-type: none;
+  }
   .section-eyebrow,
   .section-heading,
   .about-heading,
-  .about-body { opacity: 1; transform: none; transition: none; }
+  .about-body,
+  .hero-scroll-cue__line,
+  .hero-scroll-cue__star { opacity: 1; transform: none; transition: none; animation: none; }
 }

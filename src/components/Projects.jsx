@@ -2,7 +2,7 @@ import { useInView } from "../hooks/useInView";
 import { NODES } from "../data/portfolioData";
 import "./Projects.css";
 
-function NodeCard({ node }) {
+function NodeCard({ node, index, total }) {
   const [ref, inView] = useInView();
 
   return (
@@ -11,6 +11,9 @@ function NodeCard({ node }) {
       id={node.id}
       className={`node-card ${inView ? "is-visible" : ""}`}
     >
+      <p className="node-chapter">
+        Chapter {String(index + 1).padStart(2, "0")} / {String(total).padStart(2, "0")}
+      </p>
       <p className="node-problem">{node.problem}</p>
       <h3 className="node-title">{node.title}</h3>
       <p className="node-meta">
@@ -75,8 +78,8 @@ export default function Projects() {
       </div>
 
       <div className="constellation-content">
-        {chapters.map((node) => (
-          <NodeCard key={node.id} node={node} />
+        {chapters.map((node, index) => (
+          <NodeCard key={node.id} node={node} index={index} total={chapters.length} />
         ))}
       </div>
 

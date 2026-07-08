@@ -62,6 +62,12 @@ export default function Hero() {
             <EmailIcon />
           </a>
         </div>
+
+        <a href="#paper-records" className="hero-scroll-cue" aria-label="Begin the story">
+          <span className="hero-scroll-cue__line" />
+          <span className="hero-scroll-cue__star" />
+          <span className="hero-scroll-cue__text">Begin the story</span>
+        </a>
       </div>
 
       <div className="hero-visual" aria-hidden="true">

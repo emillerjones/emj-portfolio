@@ -90,9 +90,12 @@ export default function Constellation({ nodes, className = "" }) {
   // section is reached, layered on top of the persistent lit state.
   useEffect(() => {
     if (!complete) return undefined;
-    setCompletionWave(true);
+    const start = setTimeout(() => setCompletionWave(true), 0);
     const t = setTimeout(() => setCompletionWave(false), waveDuration);
-    return () => clearTimeout(t);
+    return () => {
+      clearTimeout(start);
+      clearTimeout(t);
+    };
   }, [complete, waveDuration]);
 
   const wave = introWave || completionWave;
@@ -190,11 +193,7 @@ export default function Constellation({ nodes, className = "" }) {
             >
               <span className="constellation__dot-wrap">
                 <span className="constellation__idle-ring" />
-                {isFinal ? (
-                  <StarIcon className="constellation__star-icon" />
-                ) : (
-                  <span className="constellation__dot" />
-                )}
+                <StarIcon className="constellation__star-icon" />
                 {bright && <span className="constellation__halo" />}
                 {arrived && <span className="constellation__burst" />}
               </span>
