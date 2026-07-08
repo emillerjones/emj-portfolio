@@ -171,6 +171,12 @@ main { position: relative; }
 
   max-width: none;
   margin: 0;
+  background:
+    linear-gradient(90deg, rgba(0, 0, 0, 0.96) 0%, rgba(0, 0, 0, 0.78) 43%, rgba(0, 0, 0, 0.34) 100%),
+    linear-gradient(180deg, rgba(0, 0, 0, 0.14), #000 96%),
+    url("/herobackground.png");
+  background-position: center top;
+  background-size: cover;
   scroll-snap-align: start;
   scroll-snap-stop: always;
   overflow: hidden;
@@ -541,7 +547,16 @@ main { position: relative; }
   html {
     scroll-snap-type: none;
   }
-  .hero { padding: 96px 5% 56px; }
+  .hero {
+    min-height: 100svh;
+    padding: 96px 5% 56px;
+    background:
+      linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.58) 52%, rgba(0, 0, 0, 0.22) 100%),
+      linear-gradient(180deg, rgba(0, 0, 0, 0.2), #000 96%),
+      url("/herobackground.png");
+    background-position: center top;
+    background-size: cover;
+  }
   .section,
   .section--alt,
   .about-section,

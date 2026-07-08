@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import { useInView } from "../hooks/useInView";
 import { NODES } from "../data/portfolioData";
 import "./Projects.css";
@@ -62,9 +63,151 @@ function NodeCard({ node, index, total }) {
 
 const BOOKEND_IDS = new Set(["start", "whats-next"]);
 
+function StarIcon({ className }) {
+  return (
+    <svg viewBox="0 0 24 24" className={className} aria-hidden="true">
+      <path d="M12 1.5l2.7 6.4 6.9.6-5.2 4.6 1.6 6.8L12 16.3l-6 3.6 1.6-6.8-5.2-4.6 6.9-.6z" />
+    </svg>
+  );
+}
+
+function useIsMobileStory() {
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const media = window.matchMedia("(max-width: 640px)");
+    const update = () => setIsMobile(media.matches);
+
+    update();
+    media.addEventListener("change", update);
+    return () => media.removeEventListener("change", update);
+  }, []);
+
+  return isMobile;
+}
+
+function MobileChapter({ node, index, isOpen, onToggle }) {
+  return (
+    <details
+      id={node.id}
+      className="mobile-chapter"
+      open={isOpen}
+      onToggle={(event) => onToggle(node.id, event.currentTarget.open)}
+    >
+      <summary className="mobile-chapter__summary">
+        <span className="mobile-story__star">
+          <StarIcon className="mobile-story__star-icon" />
+        </span>
+        <span className="mobile-chapter__intro">
+          <span className="mobile-chapter__number">
+            {String(index + 1).padStart(2, "0")}
+          </span>
+          <span className="mobile-chapter__title">{node.title}</span>
+          <span className="mobile-chapter__problem">{node.problem}</span>
+        </span>
+        <span className="mobile-chapter__arrow" aria-hidden="true" />
+      </summary>
+
+      <div className="mobile-chapter__panel">
+        <p className="mobile-chapter__meta">
+          {node.org} &middot; {node.period}
+        </p>
+        <p className="mobile-chapter__desc">{node.desc}</p>
+
+        <div className="node-tags">
+          {node.tags.map((t) => (
+            <span key={t} className="tag">
+              {t}
+            </span>
+          ))}
+        </div>
+
+        {node.links && node.links.length > 0 && (
+          <div className="node-links">
+            {node.links.map((l) => (
+              <a key={l.text} href={l.href} className="proj-link">
+                {l.text} &rarr;
+              </a>
+            ))}
+          </div>
+        )}
+
+        {node.related && node.related.length > 0 && (
+          <div className="node-related">
+            {node.related.map((r) => (
+              <div key={r.name} className="node-related__item">
+                <p className="node-related__name">{r.name}</p>
+                <p className="node-related__desc">{r.desc}</p>
+                <div className="node-tags">
+                  {r.tags.map((t) => (
+                    <span key={t} className="tag">
+                      {t}
+                    </span>
+                  ))}
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </details>
+  );
+}
+
+function MobileStory({ chapters }) {
+  const [openId, setOpenId] = useState(null);
+
+  const onToggle = (id, open) => {
+    setOpenId(open ? id : null);
+  };
+
+  return (
+    <section className="mobile-story" id="projects" aria-label="Story chapters">
+      <div className="mobile-story__rail" aria-hidden="true" />
+
+      <a href="#hero" className="mobile-story__bookend mobile-story__bookend--start">
+        <span className="mobile-story__star is-active">
+          <StarIcon className="mobile-story__star-icon" />
+        </span>
+        <span>
+          <span className="mobile-story__eyebrow">Start</span>
+          <span className="mobile-story__title">The beginning</span>
+        </span>
+      </a>
+
+      <div className="mobile-story__chapters">
+        {chapters.map((node, index) => (
+          <MobileChapter
+            key={node.id}
+            node={node}
+            index={index}
+            isOpen={openId === node.id}
+            onToggle={onToggle}
+          />
+        ))}
+      </div>
+
+      <a href="#contact" className="mobile-story__bookend mobile-story__bookend--final">
+        <span className="mobile-story__star is-final">
+          <StarIcon className="mobile-story__star-icon" />
+        </span>
+        <span>
+          <span className="mobile-story__eyebrow">The next chapter</span>
+          <span className="mobile-story__title">What's next</span>
+        </span>
+      </a>
+    </section>
+  );
+}
+
 export default function Projects() {
   const [ref, inView] = useInView();
+  const isMobileStory = useIsMobileStory();
   const chapters = NODES.filter((n) => !BOOKEND_IDS.has(n.id));
+
+  if (isMobileStory) {
+    return <MobileStory chapters={chapters} />;
+  }
 
   return (
     <section className="section" id="projects">

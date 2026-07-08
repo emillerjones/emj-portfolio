@@ -60,7 +60,7 @@ function useStoryComplete() {
 
 export default function Constellation({ nodes, className = "" }) {
   const sectionIds = nodes.map((n) => n.id);
-  const { activeId, revealNow } = useScrollSpy(sectionIds);
+  const { activeId, revealedIds, revealNow } = useScrollSpy(sectionIds);
   const complete = useStoryComplete();
   const [atTop, setAtTop] = useState(true);
   const [introWave, setIntroWave] = useState(false);
@@ -178,18 +178,22 @@ export default function Constellation({ nodes, className = "" }) {
 
         {stars.map((star, i) => {
           const isActive = star.id === effectiveActiveId;
+          const isBookend = i === 0 || i === stars.length - 1;
           const isFinal = i === stars.length - 1;
           const bright = isActive || complete;
           const labelRight = star.x < 55;
           const arrived = isFinal && bright;
+          const isRevealed = isBookend || complete || revealedIds.includes(star.id);
+          const displayLabel = isRevealed ? star.title : `Chapter ${i}`;
 
           return (
             <button
               key={star.id}
               type="button"
-              className={`constellation__star-btn ${bright ? "is-active" : ""} ${labelRight ? "label-right" : "label-left"} ${isFinal ? "is-final" : ""} ${wave ? "is-wave" : ""} ${arrived ? "is-arrived" : ""}`}
+              className={`constellation__star-btn ${bright ? "is-active" : ""} ${isRevealed ? "is-revealed" : ""} ${labelRight ? "label-right" : "label-left"} ${isFinal ? "is-final" : ""} ${wave ? "is-wave" : ""} ${arrived ? "is-arrived" : ""}`}
               style={{ left: `${star.x}%`, top: `${star.y}%`, animationDelay: `${i * WAVE_STEP_MS}ms` }}
               onClick={() => goTo(star.id, i)}
+              aria-label={star.title}
             >
               <span className="constellation__dot-wrap">
                 <span className="constellation__idle-ring" />
@@ -197,7 +201,12 @@ export default function Constellation({ nodes, className = "" }) {
                 {bright && <span className="constellation__halo" />}
                 {arrived && <span className="constellation__burst" />}
               </span>
-              <span className="constellation__label">{star.title}</span>
+              <span className="constellation__label">
+                <span className="constellation__label-default">{displayLabel}</span>
+                {!isRevealed && (
+                  <span className="constellation__label-hover">{star.title}</span>
+                )}
+              </span>
             </button>
           );
         })}

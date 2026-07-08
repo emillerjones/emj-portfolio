@@ -204,10 +204,36 @@
 }
 
 .constellation__label {
+  position: relative;
+  display: inline-grid;
   font-size: 13px;
   color: rgba(200, 215, 235, 0.5);
   white-space: nowrap;
   transition: color 0.3s var(--ease);
+}
+
+.constellation__label-default,
+.constellation__label-hover {
+  grid-area: 1 / 1;
+  transition: opacity 0.24s var(--ease), transform 0.24s var(--ease);
+}
+
+.constellation__label-hover {
+  color: #dbe8f7;
+  opacity: 0;
+  transform: translateY(4px);
+}
+
+.constellation__star-btn:not(.is-revealed):hover .constellation__label-default,
+.constellation__star-btn:not(.is-revealed):focus-visible .constellation__label-default {
+  opacity: 0;
+  transform: translateY(-4px);
+}
+
+.constellation__star-btn:not(.is-revealed):hover .constellation__label-hover,
+.constellation__star-btn:not(.is-revealed):focus-visible .constellation__label-hover {
+  opacity: 1;
+  transform: translateY(0);
 }
 
 .constellation__edge-label {

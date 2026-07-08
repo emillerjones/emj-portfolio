@@ -128,6 +128,10 @@
   max-width: 55ch;
 }
 
+.mobile-story {
+  display: none;
+}
+
 @media (max-width: 1100px) {
   .node-card::before {
     left: -20px;
@@ -135,14 +139,192 @@
 }
 
 @media (max-width: 640px) {
-  .node-card {
-    min-height: auto;
-    scroll-snap-align: none;
-    padding: 4.5rem 0;
+  .mobile-story {
+    position: relative;
+    display: block;
+    padding: 2.4rem 5% 3.6rem;
+    overflow: hidden;
   }
 
-  .node-card::before {
+  .mobile-story__rail {
+    position: absolute;
+    left: calc(5% + 22px);
+    top: 3.2rem;
+    bottom: 4.6rem;
+    width: 1px;
+    background: linear-gradient(
+      180deg,
+      rgba(159, 195, 238, 0.78),
+      rgba(190, 210, 235, 0.28) 48%,
+      rgba(159, 195, 238, 0.78)
+    );
+    box-shadow: 0 0 20px rgba(159, 195, 238, 0.18);
+  }
+
+  .mobile-story__bookend,
+  .mobile-chapter__summary {
+    position: relative;
+    display: grid;
+    grid-template-columns: 45px minmax(0, 1fr) 18px;
+    align-items: center;
+    gap: 1.1rem;
+    color: var(--text);
+  }
+
+  .mobile-story__bookend {
+    padding: 0.25rem 0 1.2rem;
+  }
+
+  .mobile-story__bookend--final {
+    padding: 1.4rem 0 0;
+  }
+
+  .mobile-story__chapters {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .mobile-story__star {
+    position: relative;
+    z-index: 1;
+    width: 45px;
+    height: 45px;
+    display: grid;
+    place-items: center;
+    border: 1px solid rgba(210, 225, 245, 0.48);
+    border-radius: 50%;
+    background: rgba(0, 0, 0, 0.7);
+    box-shadow: 0 0 18px rgba(159, 195, 238, 0.15);
+  }
+
+  .mobile-story__star.is-active,
+  .mobile-story__star.is-final {
+    border-color: rgba(185, 215, 250, 0.76);
+    box-shadow:
+      0 0 0 7px rgba(159, 195, 238, 0.08),
+      0 0 24px rgba(159, 195, 238, 0.42);
+  }
+
+  .mobile-story__star.is-final {
+    width: 58px;
+    height: 58px;
+    margin-left: -6px;
+  }
+
+  .mobile-story__star-icon {
+    width: 22px;
+    height: 22px;
+    fill: rgba(235, 243, 255, 0.82);
+    filter: drop-shadow(0 0 8px rgba(159, 195, 238, 0.45));
+  }
+
+  .mobile-story__star.is-final .mobile-story__star-icon {
+    width: 30px;
+    height: 30px;
+    fill: #fff;
+  }
+
+  .mobile-story__eyebrow,
+  .mobile-chapter__number {
+    display: block;
+    margin-bottom: 0.25rem;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2.2px;
+    text-transform: uppercase;
+    color: var(--accent);
+  }
+
+  .mobile-story__title,
+  .mobile-chapter__title {
+    display: block;
+    font-family: var(--display);
+    font-size: clamp(24px, 7vw, 34px);
+    line-height: 1.05;
+    color: var(--text);
+  }
+
+  .mobile-chapter {
+    position: relative;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .mobile-chapter:first-child {
+    border-top: 1px solid rgba(255, 255, 255, 0.09);
+  }
+
+  .mobile-chapter__summary {
+    min-height: 8.25rem;
+    padding: 1.1rem 0;
+    list-style: none;
+    cursor: pointer;
+  }
+
+  .mobile-chapter__summary::-webkit-details-marker {
     display: none;
+  }
+
+  .mobile-chapter__intro {
+    min-width: 0;
+  }
+
+  .mobile-chapter__problem {
+    display: block;
+    margin-top: 0.55rem;
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.45;
+  }
+
+  .mobile-chapter__arrow {
+    width: 12px;
+    height: 12px;
+    border-top: 2px solid rgba(240, 235, 225, 0.68);
+    border-right: 2px solid rgba(240, 235, 225, 0.68);
+    transform: rotate(45deg);
+    transition: transform 0.25s var(--ease), border-color 0.25s var(--ease);
+  }
+
+  .mobile-chapter[open] .mobile-chapter__arrow {
+    transform: rotate(135deg);
+    border-color: var(--accent);
+  }
+
+  .mobile-chapter[open] .mobile-story__star {
+    border-color: rgba(185, 215, 250, 0.76);
+    box-shadow:
+      0 0 0 7px rgba(159, 195, 238, 0.08),
+      0 0 24px rgba(159, 195, 238, 0.42);
+  }
+
+  .mobile-chapter__panel {
+    padding: 0 0 1.5rem calc(45px + 1.1rem);
+  }
+
+  .mobile-chapter__meta {
+    margin: 0 0 0.8rem;
+    color: var(--text-3);
+    font-size: 13px;
+  }
+
+  .mobile-chapter__desc {
+    margin: 0 0 1rem;
+    color: var(--text-2);
+    font-size: 15px;
+    line-height: 1.7;
+  }
+
+  .mobile-chapter .node-tags {
+    margin-bottom: 0.85rem;
+  }
+
+  .mobile-chapter .node-related {
+    margin-top: 1.1rem;
+    padding-top: 1rem;
+  }
+
+  .mobile-story .node-links {
+    flex-wrap: wrap;
   }
 
   .chapter-transition {
