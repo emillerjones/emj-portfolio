@@ -29,7 +29,10 @@ const DUST = [
   { x: 78, y: 18, r: 0.35, d: 1.3 },
 ];
 
-const WAVE_STEP_MS = 90;
+// Exported so other components (the Hero title-card reveal) can time
+// themselves off the same intro sweep instead of duplicating the timing.
+export const WAVE_STEP_MS = 90;
+export const INTRO_WAVE_DELAY_MS = 900;
 
 function StarIcon({ className }) {
   return (
@@ -78,8 +81,8 @@ export default function Constellation({ nodes, className = "" }) {
   // One-time gentle sweep shortly after the page loads, so the chart
   // reads as an interactive thing rather than a static illustration.
   useEffect(() => {
-    const start = setTimeout(() => setIntroWave(true), 900);
-    const end = setTimeout(() => setIntroWave(false), 900 + waveDuration);
+    const start = setTimeout(() => setIntroWave(true), INTRO_WAVE_DELAY_MS);
+    const end = setTimeout(() => setIntroWave(false), INTRO_WAVE_DELAY_MS + waveDuration);
     return () => {
       clearTimeout(start);
       clearTimeout(end);

@@ -1,3 +1,47 @@
+import { useEffect, useState } from "react";
+import { NODES } from "../data/portfolioData";
+import { INTRO_WAVE_DELAY_MS, WAVE_STEP_MS } from "./Constellation";
+
+// The constellation's one-time intro sweep (see Constellation.jsx) runs
+// from INTRO_WAVE_DELAY_MS to INTRO_WAVE_DELAY_MS + wave duration. The
+// hero title card should only appear once that sweep has finished, so
+// the sequence reads: background -> star chart lights up -> "Listen, to
+// my story" -> (a beat later) everything else. The star chart itself is
+// hidden below the same 1100px breakpoint Constellation.css uses, so on
+// mobile there's nothing to wait for -- skip straight to a short,
+// graceful entrance instead of pausing for an animation nobody sees.
+const INTRO_WAVE_DURATION_MS = NODES.length * WAVE_STEP_MS + 500;
+const DESKTOP_TITLE_DELAY_MS = INTRO_WAVE_DELAY_MS + INTRO_WAVE_DURATION_MS;
+const MOBILE_TITLE_DELAY_MS = 300;
+const REST_DELAY_AFTER_TITLE_MS = 1000;
+const HAS_STAR_CHART_QUERY = "(min-width: 1101px)";
+
+function useSequencedReveal() {
+  const [stage, setStage] = useState(() =>
+    window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "rest" : "hidden"
+  );
+  const [titleDelay] = useState(() =>
+    window.matchMedia(HAS_STAR_CHART_QUERY).matches ? DESKTOP_TITLE_DELAY_MS : MOBILE_TITLE_DELAY_MS
+  );
+
+  useEffect(() => {
+    if (stage !== "hidden") return undefined;
+    const showTitle = setTimeout(() => setStage("title"), titleDelay);
+    return () => clearTimeout(showTitle);
+  }, [stage, titleDelay]);
+
+  useEffect(() => {
+    if (stage !== "title") return undefined;
+    const showRest = setTimeout(() => setStage("rest"), REST_DELAY_AFTER_TITLE_MS);
+    return () => clearTimeout(showRest);
+  }, [stage]);
+
+  return {
+    titleIn: stage === "title" || stage === "rest",
+    restIn: stage === "rest",
+  };
+}
+
 function GithubIcon() {
   return (
     <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
@@ -23,63 +67,54 @@ function EmailIcon() {
   );
 }
 
+function HeroSocial() {
+  return (
+    <div className="hero-social">
+      <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer" aria-label="GitHub">
+        <GithubIcon />
+      </a>
+      <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
+        <LinkedinIcon />
+      </a>
+      <a href="mailto:emj.studioworks@gmail.com" aria-label="Email">
+        <EmailIcon />
+      </a>
+    </div>
+  );
+}
+
 export default function Hero() {
+  const { titleIn, restIn } = useSequencedReveal();
+
   return (
     <section className="hero" id="hero">
       <div className="hero-main">
-        <p className="hero-eyebrow">Full Stack Developer &middot; Texas</p>
+        <div className={`hero-titlecard${titleIn ? " is-in" : ""}`}>
+          <p className="hero-eyebrow">Full Stack Developer &middot; Texas</p>
+          <span className="hero-rule" aria-hidden="true" />
 
-        <h1 className="hero-headline">
-          Ten years of systems thinking.
-          <br />
-          <em>This is where that story starts.</em>
-        </h1>
-
-        <p className="hero-sub">
-          I came up through enterprise systems analysis and healthcare tech,
-          then went all-in on modern web development. Every stop is mapped out
-          to the left &mdash; start at the beginning, or jump to whatever
-          catches your eye.
-        </p>
-
-        <p className="hero-quote">
-          "I don't just write code &mdash; I understand the business problem behind it."
-        </p>
-
-        <div className="hero-actions">
-          <a href="#paper-records" className="btn btn--primary">See how it unfolds</a>
-          <a href="/resume.pdf" download className="btn btn--ghost">Download Resume &darr;</a>
+          <h1 className="hero-headline">
+            Listen,
+            <br />
+            to my story.
+          </h1>
         </div>
 
-        <div className="hero-social">
-          <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer" aria-label="GitHub">
-            <GithubIcon />
-          </a>
-          <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
-            <LinkedinIcon />
-          </a>
-          <a href="mailto:emj.studioworks@gmail.com" aria-label="Email">
-            <EmailIcon />
-          </a>
+        <div className={`hero-reveal${restIn ? " is-in" : ""}`}>
+          <p className="hero-scope">
+            A decade across government, healthcare, and independent software &mdash; solving real-world problems.
+          </p>
+
+          <span className="hero-rule" aria-hidden="true" />
+          <p className="hero-thesis">One problem. One chapter. One lesson at a time.</p>
+
+          <div className="hero-actions">
+            <a href="#paper-records" className="btn btn--primary">Begin &rarr;</a>
+            <a href="/resume.pdf" download className="btn btn--ghost">Download Resume &darr;</a>
+          </div>
+
+          <HeroSocial />
         </div>
-
-        <a href="#paper-records" className="hero-scroll-cue" aria-label="Begin the story">
-          <span className="hero-scroll-cue__line" />
-          <span className="hero-scroll-cue__star" />
-          <span className="hero-scroll-cue__text">Begin the story</span>
-        </a>
-      </div>
-
-      <div className="hero-visual" aria-hidden="true">
-        <svg viewBox="0 0 300 300" className="hero-visual__svg">
-          <circle cx="150" cy="150" r="90" className="hero-visual__ring" />
-          <circle cx="150" cy="150" r="60" className="hero-visual__ring hero-visual__ring--inner" />
-          <line x1="150" y1="60" x2="150" y2="20" className="hero-visual__spoke" />
-          <line x1="220" y1="150" x2="270" y2="150" className="hero-visual__spoke" />
-          <line x1="150" y1="240" x2="150" y2="280" className="hero-visual__spoke" />
-          <line x1="80" y1="150" x2="30" y2="150" className="hero-visual__spoke" />
-          <circle cx="150" cy="150" r="10" className="hero-visual__core" />
-        </svg>
       </div>
     </section>
   );

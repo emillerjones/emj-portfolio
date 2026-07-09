@@ -576,7 +576,7 @@ function MobileStory({ chapters }) {
 
 export default function Projects() {
   const [ref, inView] = useInView();
-  const [rightRailMode, setRightRailMode] = useState("proof");
+  const [rightRailMode, setRightRailMode] = useState("ghost");
   const isMobileStory = useIsMobileStory();
   const chapters = NODES.filter((n) => !BOOKEND_IDS.has(n.id));
 
