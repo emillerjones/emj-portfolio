@@ -541,6 +541,16 @@ function MobileStory({ chapters }) {
     });
   };
 
+  // Runs after the open/close state (and any previously-open card's
+  // collapse) has actually committed, so the scroll target reflects the
+  // final layout instead of a stale one mid-transition.
+  useEffect(() => {
+    if (!openId) return;
+    const el = document.getElementById(openId);
+    if (!el) return;
+    el.scrollIntoView({ behavior: "smooth", block: "start" });
+  }, [openId]);
+
   return (
     <section className="mobile-story" id="projects" aria-label="Story chapters">
       <InkDefs />
