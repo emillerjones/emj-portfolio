@@ -16,7 +16,7 @@ function generateStars(count) {
   return stars;
 }
 
-const STARS = generateStars(90);
+const STARS = generateStars(190);
 
 export default function Starfield() {
   return (

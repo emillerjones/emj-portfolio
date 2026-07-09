@@ -15,7 +15,18 @@ function getTop(el) {
 }
 
 function getCurrentIndex(sections) {
-  const probe = window.scrollY + window.innerHeight * 0.48;
+  const viewportAnchor = window.scrollY + Math.min(32, window.innerHeight * 0.08);
+  const containingIndex = sections.findIndex((section) => {
+    const top = getTop(section);
+    const bottom = top + section.offsetHeight;
+    return viewportAnchor >= top - 2 && viewportAnchor < bottom - 2;
+  });
+
+  if (containingIndex !== -1) {
+    return containingIndex;
+  }
+
+  const probe = window.scrollY + window.innerHeight * 0.32;
 
   return sections.reduce((closestIndex, section, index) => {
     const closestDistance = Math.abs(getTop(sections[closestIndex]) - probe);
