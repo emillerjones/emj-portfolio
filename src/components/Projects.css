@@ -524,7 +524,10 @@
   }
 
   .mobile-chapter__summary {
-    grid-template-columns: 45px 48px minmax(0, 1fr) 18px;
+    grid-template-columns: 45px minmax(0, 1fr) 18px;
+    position: relative;
+    z-index: 0;
+    overflow: hidden;
   }
 
   .mobile-story__bookend {
@@ -635,11 +638,13 @@
   }
 
   .mobile-chapter__ornament {
-    width: 48px;
-    height: 48px;
-    display: grid;
-    place-items: center;
-    opacity: 0.55;
+    position: absolute;
+    right: -8px;
+    top: -6px;
+    width: min(30vw, 116px);
+    z-index: -1;
+    opacity: 0.34;
+    pointer-events: none;
   }
 
   .mobile-chapter__ornament .vignette-art {
@@ -648,15 +653,9 @@
   }
 
   .mobile-chapter__ornament .vignette-art__scene {
-    width: 46px;
+    width: 100%;
   }
 
-  .mobile-chapter__ornament .vignette-art__trace {
-    stroke-width: 2.3;
-    opacity: 0.62;
-  }
-
-  .mobile-chapter__ornament .vignette-art__trace--ghost,
   .mobile-chapter__ornament .vignette-art__rule {
     display: none;
   }
@@ -698,12 +697,12 @@
   }
 
   .mobile-chapter[open] .mobile-chapter__ornament {
-    opacity: 0.92;
+    opacity: 0.55;
   }
 
   .mobile-chapter__panel {
     position: relative;
-    padding: 0 0 1.5rem calc(93px + 2.2rem);
+    padding: 0 0 1.5rem calc(45px + 1.1rem);
     overflow: hidden;
   }
 

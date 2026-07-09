@@ -529,7 +529,16 @@ function MobileStory({ chapters }) {
   const [openId, setOpenId] = useState(null);
 
   const onToggle = (id, open) => {
-    setOpenId(open ? id : null);
+    // Controlled <details>: when React closes the previously-open card
+    // programmatically (to open a new one), the browser still fires a
+    // native "toggle" event for that close. Without the guard below,
+    // that stale event arrives after the new card's "open" update and
+    // clobbers it back to closed. Only honor a close if it's for the
+    // card we currently think is open.
+    setOpenId((current) => {
+      if (open) return id;
+      return current === id ? null : current;
+    });
   };
 
   return (
