@@ -290,7 +290,7 @@ main { position: relative; }
 @media (max-width: 1100px) {
   .hero {
     align-items: flex-start;
-    padding-top: calc(5.5vh + 25px);
+    padding-top: calc(11vh + 50px);
     padding-left: 6%;
   }
   .hero::after,
@@ -493,7 +493,7 @@ main { position: relative; }
   }
   .hero {
     min-height: 100svh;
-    padding: 48px 5% 56px;
+    padding: 96px 5% 56px;
     background:
       linear-gradient(90deg, rgba(0, 0, 0, 0.92) 0%, rgba(0, 0, 0, 0.58) 52%, rgba(0, 0, 0, 0.22) 100%),
       linear-gradient(180deg, rgba(0, 0, 0, 0.2), #000 96%),
