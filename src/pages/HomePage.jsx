@@ -19,15 +19,17 @@ export default function HomePage() {
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
   const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
-  const [heroScroll, setHeroScroll] = useState(0);
   const [pulseProgress, setPulseProgress] = useState(0);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
+  const lastLightsRef = useRef(1);
   const ignitionLockRef = useRef(false);
   const ignitionTimerRef = useRef(null);
   const touchStartRef = useRef(null);
   const pointerStartRef = useRef(null);
   const heroRef = useRef(null);
+  const contentRef = useRef(null);
+  const swipeHintRef = useRef(null);
   const pulseFrameRef = useRef(null);
 
   const stirField = (direction, strength) => {
@@ -114,9 +116,16 @@ export default function HomePage() {
   // reaches the viewport" -- with the hero at exactly 100svh, the
   // reveal section's bottom starts creeping up from the first pixel of
   // scroll, while the still-fading hero text (anchored near the hero's
-  // own bottom edge) is still on screen. `heroScroll` is the raw
-  // fraction across that whole tall box; lights and the text
-  // animation each derive their own, faster-completing fraction from it.
+  // own bottom edge) is still on screen. `fraction` is the raw progress
+  // across that whole tall box; lights and the text animation each
+  // derive their own, faster-completing fraction from it.
+  //
+  // The hero text/hint transform+opacity are written straight to the
+  // DOM via refs instead of through React state: routing a value that
+  // changes every scroll frame through setState forces a full component
+  // re-render each time, which is where the choppiness on mobile was
+  // coming from -- the buttons and hint's own bounce animation never
+  // touched React state, which is exactly why *they* stayed smooth.
   useEffect(() => {
     if (!mobile) return;
     let ticking = false;
@@ -124,8 +133,22 @@ export default function HomePage() {
       ticking = false;
       const heroHeight = heroRef.current?.offsetHeight || window.innerHeight;
       const fraction = Math.max(0, Math.min(1, window.scrollY / heroHeight));
-      setHeroScroll(fraction);
-      setLightsOn(Math.round(Math.min(1, fraction / 0.55) * totalLights));
+
+      const nextLights = Math.max(1, Math.round(Math.min(1, fraction / 0.55) * totalLights));
+      if (nextLights !== lastLightsRef.current) {
+        lastLightsRef.current = nextLights;
+        setLightsOn(nextLights);
+      }
+
+      const textFraction = Math.min(1, fraction / 0.3);
+      if (contentRef.current) {
+        contentRef.current.style.transform = `translateY(${-textFraction * 46}vh)`;
+        contentRef.current.style.opacity = String(Math.max(0, 1 - textFraction));
+        contentRef.current.style.pointerEvents = textFraction > 0.8 ? "none" : "";
+      }
+      if (swipeHintRef.current) {
+        swipeHintRef.current.style.opacity = String(Math.max(0, 1 - fraction / 0.12));
+      }
     };
     const handleScroll = () => {
       if (ticking) return;
@@ -189,18 +212,6 @@ export default function HomePage() {
   const orbProgress = totalOrbs > 0 ? orbsOn / totalOrbs : 1;
   const effectiveLightProgress = Math.max(lightProgress, pulseProgress);
 
-  // Hero copy is a normal in-flow element (position: absolute inside
-  // .landing-hero), so real scroll alone guarantees it's gone once
-  // you've scrolled past the hero box. The extra height on .landing-hero
-  // (see HomePage.css) buys scroll runway; textFraction spends only the
-  // first slice of that runway so the text is fully gone well before
-  // the reveal section's top edge reaches the viewport.
-  const textFraction = mobile ? Math.min(1, heroScroll / 0.3) : 0;
-  const heroShiftVh = mobile ? -textFraction * 46 : 0;
-  const heroOpacity = mobile ? Math.max(0, 1 - textFraction) : 1;
-  const heroPointerEvents = mobile && textFraction > 0.8 ? "none" : undefined;
-  const hintOpacity = mobile ? Math.max(0, 1 - heroScroll / 0.12) : 1;
-
   return (
     <main
       className="landing-page"
@@ -238,7 +249,7 @@ export default function HomePage() {
           <section
             className="landing-page__content"
             aria-labelledby="landing-title"
-            style={mobile ? { transform: `translateY(${heroShiftVh}vh)`, opacity: heroOpacity, pointerEvents: heroPointerEvents } : undefined}
+            ref={contentRef}
           >
             <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
             <h1 id="landing-title">Better software starts<br />with the real process.</h1>
@@ -262,7 +273,7 @@ export default function HomePage() {
               <span>Projects</span>
             </Link>
 
-            <div className="landing-page__swipe-hint" aria-hidden="true" style={mobile ? { opacity: hintOpacity } : undefined}>
+            <div className="landing-page__swipe-hint" aria-hidden="true" ref={swipeHintRef}>
               <i />
               <span>Swipe up for more</span>
             </div>
