@@ -14,6 +14,24 @@ const MOBILE_INTRO = {
   interfaceStageGapMs: 800,
   interfaceFadeMs: 1900,
 };
+const MOBILE_INTRO_SESSION_KEY = "emj-home-intro-seen-v1";
+
+function hasSeenMobileIntro() {
+  try {
+    return window.sessionStorage.getItem(MOBILE_INTRO_SESSION_KEY) === "true";
+  } catch {
+    return false;
+  }
+}
+
+function rememberMobileIntro() {
+  try {
+    window.sessionStorage.setItem(MOBILE_INTRO_SESSION_KEY, "true");
+  } catch {
+    // Storage can be unavailable in locked-down browser contexts. The intro
+    // still works; it simply cannot be remembered for the rest of the tab.
+  }
+}
 
 const FEATURED_PROJECTS = [
   { tag: "Live product", name: "Horizon", result: "A full-stack raid calendar now tracking 28 guilds and 500+ raids." },
@@ -25,16 +43,17 @@ export default function HomePage() {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const totalLights = useMemo(() => estimateOrbLightCount(mobile), [mobile]);
   const totalOrbs = useMemo(() => estimateOrbTotalCount(mobile), [mobile]);
-  const [lightsOn, setLightsOn] = useState(() => (mobile ? 0 : 1));
+  const skipMobileIntro = useMemo(() => mobile && hasSeenMobileIntro(), [mobile]);
+  const [lightsOn, setLightsOn] = useState(() => (mobile ? (skipMobileIntro ? totalLights : 0) : 1));
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
   const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
   const [pulseProgress, setPulseProgress] = useState(0);
   const [sceneReady, setSceneReady] = useState(false);
-  const [mobileIntroReady, setMobileIntroReady] = useState(() => !mobile);
+  const [mobileIntroReady, setMobileIntroReady] = useState(() => !mobile || skipMobileIntro);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
-  const lastLightsRef = useRef(mobile ? 0 : 1);
+  const lastLightsRef = useRef(mobile ? (skipMobileIntro ? totalLights : 0) : 1);
   const ignitionLockRef = useRef(false);
   const ignitionTimerRef = useRef(null);
   const touchStartRef = useRef(null);
@@ -92,7 +111,8 @@ export default function HomePage() {
   }, []);
 
   useEffect(() => {
-    if (!mobile || !sceneReady) return;
+    if (!mobile || !sceneReady || skipMobileIntro) return;
+    rememberMobileIntro();
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
       const reducedMotionFrame = requestAnimationFrame(() => {
         lastLightsRef.current = totalLights;
@@ -121,7 +141,7 @@ export default function HomePage() {
     };
     frame = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(frame);
-  }, [mobile, sceneReady, totalLights]);
+  }, [mobile, sceneReady, skipMobileIntro, totalLights]);
 
   // Desktop: a single fixed screen, mouse wheel hijacked entirely to
   // drive the lights -- unchanged from before.
