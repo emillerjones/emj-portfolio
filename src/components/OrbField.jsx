@@ -69,6 +69,69 @@ function makeWoodTexture() {
   return texture;
 }
 
+function makeSurfaceTexture(type) {
+  const size = 128;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const ctx = canvas.getContext("2d");
+  ctx.fillStyle = "#d8d8d8";
+  ctx.fillRect(0, 0, size, size);
+
+  if (type === "ceramic") {
+    for (let i = 0; i < 520; i += 1) {
+      const shade = 145 + Math.random() * 90;
+      ctx.fillStyle = `rgba(${shade},${shade},${shade},${0.08 + Math.random() * 0.2})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * size, Math.random() * size, 0.25 + Math.random() * 0.8, 0, Math.PI * 2);
+      ctx.fill();
+    }
+  } else if (type === "slate") {
+    for (let y = -20; y < size + 20; y += 5 + Math.random() * 7) {
+      ctx.strokeStyle = `rgba(55,65,76,${0.12 + Math.random() * 0.22})`;
+      ctx.lineWidth = 0.5 + Math.random() * 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, y + Math.random() * 4);
+      ctx.bezierCurveTo(35, y - 4, 88, y + 5, size, y - 2);
+      ctx.stroke();
+    }
+  } else if (type === "brass") {
+    for (let x = 0; x < size; x += 2) {
+      const light = 150 + Math.sin(x * 0.42) * 30 + Math.random() * 18;
+      ctx.strokeStyle = `rgba(${light},${light},${light},0.32)`;
+      ctx.beginPath();
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + Math.sin(x) * 0.5, size);
+      ctx.stroke();
+    }
+  } else if (type === "glass") {
+    for (let i = 0; i < 90; i += 1) {
+      const radius = 1 + Math.random() * 4;
+      ctx.strokeStyle = `rgba(255,255,255,${0.06 + Math.random() * 0.12})`;
+      ctx.beginPath();
+      ctx.arc(Math.random() * size, Math.random() * size, radius, 0, Math.PI * 2);
+      ctx.stroke();
+    }
+  } else if (type === "crystal") {
+    for (let i = 0; i < 34; i += 1) {
+      ctx.strokeStyle = `rgba(245,255,252,${0.08 + Math.random() * 0.18})`;
+      ctx.lineWidth = 0.4 + Math.random();
+      ctx.beginPath();
+      const x = Math.random() * size;
+      ctx.moveTo(x, 0);
+      ctx.lineTo(x + (Math.random() - 0.5) * 45, size);
+      ctx.stroke();
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.anisotropy = 8;
+  return texture;
+}
+
 function makeField(count, litRatio) {
   const items = [];
   for (let i = 0; i < count; i += 1) {
@@ -123,6 +186,15 @@ function useOrbFieldData(mobile) {
   return useMemo(() => {
     const stoneTexture = makeStoneTexture();
     const woodTexture = makeWoodTexture();
+    const surfaceTextures = {
+      ceramic: makeSurfaceTexture("ceramic"),
+      slate: makeSurfaceTexture("slate"),
+      brass: makeSurfaceTexture("brass"),
+      glass: makeSurfaceTexture("glass"),
+      crystal: makeSurfaceTexture("crystal"),
+      stone: stoneTexture,
+      wood: woodTexture,
+    };
     const bulbs = [];
 
     const groups = GROUP_DEFS.map((def) => {
@@ -148,7 +220,7 @@ function useOrbFieldData(mobile) {
           source: item,
         });
       });
-      const map = def.texture === "stone" ? stoneTexture : def.texture === "wood" ? woodTexture : null;
+      const map = surfaceTextures[def.texture] || null;
       // Real transmission (a full extra background render pass) is the
       // priciest material feature here -- skip it on mobile and fall
       // back to a plain glossy clearcoat look instead.
@@ -614,7 +686,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, on
   return (
     <div className="orb-field" aria-hidden="true">
       <Canvas
-        dpr={mobile ? [1, 2] : [1, 2]}
+        dpr={mobile ? [1, 4] : [1, 2]}
         camera={{ position: [0, 0, 9.5], fov: mobile ? 60 : 50, near: 0.1, far: 40 }}
         gl={{ antialias: true, alpha: true, powerPreference: "high-performance" }}
         frameloop={reducedMotion ? "demand" : "always"}
@@ -627,7 +699,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, on
         <fog attach="fog" args={["#020307", 15, 42]} />
         <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} onAssembled={onAssembled} />
         <Stats showPanel={0} className="orb-field__stats" />
-        <EffectComposer multisampling={0} disableNormalPass>
+        <EffectComposer multisampling={2} disableNormalPass>
           <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={mobile ? 1.35 : 1.7} mipmapBlur radius={0.55} />
         </EffectComposer>
       </Canvas>
