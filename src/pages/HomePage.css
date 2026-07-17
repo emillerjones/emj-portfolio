@@ -24,10 +24,36 @@
 }
 .landing-page__mobile-identity { display: none; }
 .landing-page__swipe-hint { display: none; }
-.landing-resume-pill { display: none; }
+.landing-page__flank-row { display: none; }
 .landing-reveal { display: none; }
 
+.landing-resume-pill {
+  position: fixed;
+  z-index: 20;
+  top: 88px;
+  right: 20px;
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  padding: 8px 13px;
+  color: #0c0d10;
+  font-size: 10px;
+  font-weight: 750;
+  letter-spacing: 0.04em;
+  background: var(--accent);
+  border-radius: 20px;
+  box-shadow: 0 6px 18px rgb(0 0 0 / 35%);
+  transition: transform 160ms ease, background 160ms ease;
+}
+.landing-resume-pill:hover { background: var(--accent-hover); transform: translateY(-1px); }
+.landing-resume-pill span { color: #0c0d10; }
+
 .landing-hero {
+  position: relative;
+  height: 100%;
+}
+
+.landing-hero__frame {
   position: relative;
   height: 100%;
 }
@@ -135,43 +161,90 @@
 
 @media (max-width: 760px) {
   .landing-page { height: auto; min-height: 100svh; overflow: visible; touch-action: pan-y; }
-  .landing-hero { min-height: 100svh; height: auto; overflow: hidden; }
+  /* Deliberately taller than one screen: the reveal section's top edge
+     only reaches the viewport once you've scrolled past this whole
+     box, so there's runway between the hero text finishing its exit
+     and the reveal section arriving underneath it (see the JS in
+     HomePage.jsx for how that runway is split). */
+  .landing-hero { min-height: 175svh; height: auto; overflow: hidden; }
+  /* The first-screen "frame" that .landing-page__content etc. actually
+     anchor against -- keeps their bottom/top offsets meaning "near the
+     edge of the visible screen" instead of "near the edge of the whole
+     175svh-tall hero box". */
+  .landing-hero__frame { height: 100svh; }
   .landing-page__paper { position: fixed; }
   .landing-page__mobile-identity { position: absolute; z-index: 12; top: max(18px, env(safe-area-inset-top)); left: 20px; display: grid; gap: 3px; text-shadow: 0 2px 16px #000; }
   .landing-page__mobile-identity strong { font-family: var(--display); font-size: 14px; letter-spacing: -0.01em; }
   .landing-page__mobile-identity span { color: var(--text-3); font-size: 7px; font-weight: 700; letter-spacing: 0.13em; text-transform: uppercase; }
-  .landing-page__content { position: fixed; top: auto; right: 20px; bottom: 46px; left: 20px; width: auto; max-width: 410px; will-change: transform, opacity; }
+  .landing-page__content { top: auto; right: 20px; bottom: 100px; left: 20px; width: auto; transform: none; will-change: transform, opacity; }
   .landing-page__eyebrow { margin-bottom: 12px; font-size: 8px; }
   .landing-page__eyebrow,
   .landing-page__method { display: none; }
-  .landing-page h1 { max-width: 360px; font-size: clamp(29px, 8.1vw, 40px); line-height: 0.98; text-wrap: balance; text-shadow: 0 2px 22px rgb(0 0 0 / 65%); }
-  .landing-page__intro { display: block; width: min(355px, 96%); margin-top: 11px; font-size: 10px; line-height: 1.48; text-shadow: 0 2px 14px #000; }
+  .landing-page h1 { max-width: 460px; font-size: clamp(29px, 9vw, 44px); line-height: 0.98; text-wrap: balance; text-shadow: 0 2px 22px rgb(0 0 0 / 65%); }
+  .landing-page__intro { display: block; width: min(420px, 100%); margin-top: 11px; font-size: 10px; line-height: 1.48; text-shadow: 0 2px 14px #000; }
   .landing-page__method li { gap: 4px; font-size: 7px; }
-  .landing-page__actions { display: grid; grid-template-columns: 1.45fr 1fr 1fr; width: 100%; margin-top: 15px; padding-top: 12px; gap: 6px; border-top: 1px solid rgb(255 255 255 / 12%); }
-  .landing-page__actions a { display: flex; align-items: center; justify-content: center; min-height: 38px; padding: 8px 6px; font-size: 8px; text-align: center; background: rgb(2 4 7 / 58%); border: 1px solid rgb(255 255 255 / 10%); border-radius: 3px; backdrop-filter: blur(6px); }
-  .landing-page__actions a span { display: none; }
-  .landing-page__actions .landing-page__primary { padding: 8px 10px; border-color: transparent; }
+  .landing-page__actions { display: none; }
   .landing-controls { display: none; }
   .landing-control > span { margin-bottom: 5px; }
   .landing-control output { font-size: 17px; }
   .landing-control small { display: none; }
   .landing-page__footer { display: none; }
 
-  .landing-page__swipe-hint {
+  /* Projects and My Story flank the swipe hint at the very bottom of
+     the screen instead of stacking with it inside the hero text block
+     -- they're chrome, not copy, so they stay put while the hero text
+     flies away above them. */
+  .landing-page__flank-row {
     position: absolute;
     z-index: 11;
-    left: 50%;
-    bottom: max(14px, env(safe-area-inset-bottom));
+    right: 18px;
+    bottom: max(16px, env(safe-area-inset-bottom));
+    left: 18px;
+    display: flex;
+    align-items: flex-end;
+    justify-content: space-between;
+  }
+
+  .landing-page__flank-action {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 7px;
+    color: rgb(240 235 225 / 78%);
+    font-size: 8px;
+    font-weight: 750;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    transition: color 160ms ease;
+  }
+  .landing-page__flank-action:active { color: var(--text); }
+  .landing-page__flank-action i {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 38px;
+    height: 38px;
+    font-size: 15px;
+    font-style: normal;
+    color: var(--accent);
+    background: rgb(255 255 255 / 6%);
+    border: 1px solid var(--accent-mid);
+    border-radius: 50%;
+    backdrop-filter: blur(8px);
+    box-shadow: 0 0 0 1px rgb(159 195 238 / 12%), 0 6px 16px rgb(0 0 0 / 35%);
+  }
+
+  .landing-page__swipe-hint {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 5px;
+    padding-bottom: 4px;
     color: rgb(255 255 255 / 42%);
     font-size: 7px;
     font-weight: 700;
     letter-spacing: 0.14em;
     text-transform: uppercase;
-    transform: translateX(-50%);
     pointer-events: none;
   }
   .landing-page__swipe-hint i {
@@ -184,24 +257,7 @@
     opacity: 0.75;
   }
 
-  .landing-resume-pill {
-    position: fixed;
-    z-index: 20;
-    top: max(58px, calc(env(safe-area-inset-top) + 40px));
-    left: 20px;
-    display: flex;
-    align-items: center;
-    gap: 5px;
-    padding: 8px 12px;
-    color: #0c0d10;
-    font-size: 9px;
-    font-weight: 750;
-    letter-spacing: 0.04em;
-    background: var(--accent);
-    border-radius: 20px;
-    box-shadow: 0 6px 18px rgb(0 0 0 / 35%);
-  }
-  .landing-resume-pill span { color: #0c0d10; }
+  .landing-resume-pill { top: max(16px, env(safe-area-inset-top)); right: 16px; font-size: 9px; padding: 7px 11px; }
 
   .landing-reveal {
     position: relative;

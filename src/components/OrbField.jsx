@@ -1,6 +1,5 @@
 import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { Canvas, useFrame } from "@react-three/fiber";
-import { Stats } from "@react-three/drei";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { GROUP_DEFS, MAX_REAL_LIGHTS, groupCount, groupLitRatio } from "./orbFieldConfig";
@@ -775,7 +774,6 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, st
       >
         <fog attach="fog" args={["#000000", 15, 42]} />
         <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} onAssembled={onAssembled} />
-        <Stats showPanel={0} className="orb-field__stats" />
         <EffectComposer multisampling={2} disableNormalPass>
           <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={mobile ? 1.35 : 1.7} mipmapBlur radius={0.55} />
         </EffectComposer>

@@ -15,11 +15,12 @@ export default function HomePage() {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const totalLights = useMemo(() => estimateOrbLightCount(mobile), [mobile]);
   const totalOrbs = useMemo(() => estimateOrbTotalCount(mobile), [mobile]);
-  const [lightsOn, setLightsOn] = useState(() => (mobile ? 1 : 0));
+  const [lightsOn, setLightsOn] = useState(1);
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
   const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
   const [heroScroll, setHeroScroll] = useState(0);
+  const [pulseProgress, setPulseProgress] = useState(0);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
   const ignitionLockRef = useRef(false);
@@ -27,10 +28,47 @@ export default function HomePage() {
   const touchStartRef = useRef(null);
   const pointerStartRef = useRef(null);
   const heroRef = useRef(null);
+  const pulseFrameRef = useRef(null);
 
   const stirField = (direction, strength) => {
     setStirSignal((current) => ({ id: current.id + 1, direction, strength }));
   };
+
+  // A one-off "every light briefly comes on" flourish for the résumé
+  // pill -- rises fast, holds barely a beat, eases back out. Reuses the
+  // exact same `progress` channel the scroll/wheel interaction already
+  // drives, just overridden for ~1.5s via requestAnimationFrame instead
+  // of scroll position.
+  const triggerLightPulse = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (pulseFrameRef.current) cancelAnimationFrame(pulseFrameRef.current);
+    const start = performance.now();
+    const duration = 2000;
+    const riseEnd = duration * 0.35;
+    const tick = (now) => {
+      const elapsed = now - start;
+      if (elapsed >= duration) {
+        setPulseProgress(0);
+        pulseFrameRef.current = null;
+        return;
+      }
+      let value;
+      if (elapsed < riseEnd) {
+        const t = elapsed / riseEnd;
+        value = 1 - (1 - t) * (1 - t);
+      } else {
+        const t = (elapsed - riseEnd) / (duration - riseEnd);
+        value = (1 - t) * (1 - t);
+      }
+      setPulseProgress(Math.max(0, Math.min(1, value)));
+      pulseFrameRef.current = requestAnimationFrame(tick);
+    };
+    pulseFrameRef.current = requestAnimationFrame(tick);
+  };
+
+  useEffect(() => () => {
+    if (pulseFrameRef.current) cancelAnimationFrame(pulseFrameRef.current);
+  }, []);
 
   // Desktop: a single fixed screen, mouse wheel hijacked entirely to
   // drive the lights -- unchanged from before.
@@ -69,6 +107,16 @@ export default function HomePage() {
   // Mobile: real document scroll drives both the lights and the hero
   // text's bottom-to-top travel. Native touch/momentum/accessibility --
   // nothing hand-rolled here, the browser does the actual scrolling.
+  //
+  // The hero section is deliberately taller than one screen (see
+  // HomePage.css) purely so there's scroll runway between "the hero
+  // text has finished flying off" and "the reveal section's top edge
+  // reaches the viewport" -- with the hero at exactly 100svh, the
+  // reveal section's bottom starts creeping up from the first pixel of
+  // scroll, while the still-fading hero text (anchored near the hero's
+  // own bottom edge) is still on screen. `heroScroll` is the raw
+  // fraction across that whole tall box; lights and the text
+  // animation each derive their own, faster-completing fraction from it.
   useEffect(() => {
     if (!mobile) return;
     let ticking = false;
@@ -77,7 +125,7 @@ export default function HomePage() {
       const heroHeight = heroRef.current?.offsetHeight || window.innerHeight;
       const fraction = Math.max(0, Math.min(1, window.scrollY / heroHeight));
       setHeroScroll(fraction);
-      setLightsOn(Math.round(fraction * totalLights));
+      setLightsOn(Math.round(Math.min(1, fraction / 0.55) * totalLights));
     };
     const handleScroll = () => {
       if (ticking) return;
@@ -139,21 +187,19 @@ export default function HomePage() {
 
   const lightProgress = totalLights > 0 ? lightsOn / totalLights : 0;
   const orbProgress = totalOrbs > 0 ? orbsOn / totalOrbs : 1;
+  const effectiveLightProgress = Math.max(lightProgress, pulseProgress);
 
-  // Hero copy starts at its normal resting spot and flies up/out as you
-  // scroll through the hero's own height, fading before the reveal
-  // section takes over -- and stops accepting clicks once it's mostly
-  // gone so it can't shadow the reveal content underneath it.
-  const heroShiftVh = mobile ? -heroScroll * 70 : 0;
-  const heroOpacity = mobile ? Math.max(0, 1 - heroScroll / 0.85) : 1;
-  const heroPointerEvents = mobile && heroScroll > 0.6 ? "none" : undefined;
+  // Hero copy is a normal in-flow element (position: absolute inside
+  // .landing-hero), so real scroll alone guarantees it's gone once
+  // you've scrolled past the hero box. The extra height on .landing-hero
+  // (see HomePage.css) buys scroll runway; textFraction spends only the
+  // first slice of that runway so the text is fully gone well before
+  // the reveal section's top edge reaches the viewport.
+  const textFraction = mobile ? Math.min(1, heroScroll / 0.3) : 0;
+  const heroShiftVh = mobile ? -textFraction * 46 : 0;
+  const heroOpacity = mobile ? Math.max(0, 1 - textFraction) : 1;
+  const heroPointerEvents = mobile && textFraction > 0.8 ? "none" : undefined;
   const hintOpacity = mobile ? Math.max(0, 1 - heroScroll / 0.12) : 1;
-  // The pill only needs to bridge the gap while the hero's own résumé
-  // link is fading away -- once the reveal section is reachable it has
-  // its own résumé link, so the pill steps aside instead of sitting on
-  // top of that section's text for the rest of the scroll.
-  const pillOpacity = mobile ? Math.max(0, 1 - Math.max(0, heroScroll - 0.88) / 0.12) : 1;
-  const pillPointerEvents = mobile && heroScroll >= 1 ? "none" : undefined;
 
   return (
     <main
@@ -175,49 +221,57 @@ export default function HomePage() {
           </div>
         )}
       >
-        <OrbField progress={lightProgress} orbProgress={orbProgress} motion={orbsMoving} stirSignal={stirSignal} />
+        <OrbField progress={effectiveLightProgress} orbProgress={orbProgress} motion={orbsMoving} stirSignal={stirSignal} />
       </Suspense>
 
-      <a
-        className="landing-resume-pill"
-        href="/resume.pdf"
-        download
-        style={mobile ? { opacity: pillOpacity, pointerEvents: pillPointerEvents } : undefined}
-      >
+      <a className="landing-resume-pill" href="/resume.pdf" download onClick={triggerLightPulse}>
         Résumé <span>↓</span>
       </a>
 
       <section className="landing-hero" ref={heroRef}>
-        <div className="landing-page__mobile-identity">
-          <strong>Evan Miller-Jones</strong>
-          <span>Portfolio · Product Builder &amp; Full-Stack Developer</span>
-        </div>
-
-        <section
-          className="landing-page__content"
-          aria-labelledby="landing-title"
-          style={mobile ? { transform: `translateY(${heroShiftVh}vh)`, opacity: heroOpacity, pointerEvents: heroPointerEvents } : undefined}
-        >
-          <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
-          <h1 id="landing-title">Better software starts<br />with the real process.</h1>
-          <p className="landing-page__intro">
-            I work close to the workflow—find where people lose time or context, understand the surrounding system, build something better, then watch real use and improve it.
-          </p>
-          <ol className="landing-page__method" aria-label="Product building process">
-            <li><small>01</small><span>Notice the friction</span></li>
-            <li><small>02</small><span>Understand the workflow</span></li>
-            <li><small>03</small><span>Build, watch, improve</span></li>
-          </ol>
-          <div className="landing-page__actions">
-            <Link className="landing-page__primary" to="/projects">View Projects <span>→</span></Link>
-            <Link to="/mystory">My Story <span>→</span></Link>
-            <a href="/resume.pdf" download>Résumé <span>↓</span></a>
+        <div className="landing-hero__frame">
+          <div className="landing-page__mobile-identity">
+            <strong>Evan Miller-Jones</strong>
+            <span>Portfolio · Product Builder &amp; Full-Stack Developer</span>
           </div>
-        </section>
 
-        <div className="landing-page__swipe-hint" aria-hidden="true" style={mobile ? { opacity: hintOpacity } : undefined}>
-          <i />
-          <span>Swipe up for more</span>
+          <section
+            className="landing-page__content"
+            aria-labelledby="landing-title"
+            style={mobile ? { transform: `translateY(${heroShiftVh}vh)`, opacity: heroOpacity, pointerEvents: heroPointerEvents } : undefined}
+          >
+            <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
+            <h1 id="landing-title">Better software starts<br />with the real process.</h1>
+            <p className="landing-page__intro">
+              I work close to the workflow—find where people lose time or context, understand the surrounding system, build something better, then watch real use and improve it.
+            </p>
+            <ol className="landing-page__method" aria-label="Product building process">
+              <li><small>01</small><span>Notice the friction</span></li>
+              <li><small>02</small><span>Understand the workflow</span></li>
+              <li><small>03</small><span>Build, watch, improve</span></li>
+            </ol>
+            <div className="landing-page__actions">
+              <Link className="landing-page__primary" to="/projects">View Projects <span>→</span></Link>
+              <Link to="/mystory">My Story <span>→</span></Link>
+            </div>
+          </section>
+
+          <div className="landing-page__flank-row">
+            <Link className="landing-page__flank-action" to="/projects">
+              <i>↗</i>
+              <span>Projects</span>
+            </Link>
+
+            <div className="landing-page__swipe-hint" aria-hidden="true" style={mobile ? { opacity: hintOpacity } : undefined}>
+              <i />
+              <span>Swipe up for more</span>
+            </div>
+
+            <Link className="landing-page__flank-action" to="/mystory">
+              <i>↗</i>
+              <span>My Story</span>
+            </Link>
+          </div>
         </div>
 
         <div className="landing-controls">

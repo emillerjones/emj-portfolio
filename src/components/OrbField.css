@@ -1,6 +1,5 @@
 .orb-field { position: absolute; z-index: 0; inset: 0; pointer-events: none; }
 .orb-field canvas { display: block; }
-.orb-field__stats { top: 12px !important; right: 12px !important; left: auto !important; z-index: 100 !important; }
 
 @media (max-width: 760px) {
   /* The home page becomes a real scrolling document on mobile (see
