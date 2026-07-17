@@ -10,8 +10,8 @@ const OrbField = lazy(() => import("../components/OrbField"));
 const MOBILE_INTRO = {
   initialDelayMs: 320,
   lightIntervalMs: 225,
-  interfaceRevealLight: 6,
-  interfaceFadeMs: 1500,
+  interfaceRevealLight: 7,
+  interfaceFadeMs: 4500,
 };
 
 const FEATURED_PROJECTS = [
