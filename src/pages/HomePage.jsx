@@ -333,14 +333,15 @@ export default function HomePage() {
       </Suspense>
 
       <a className="landing-resume-pill" href="/resume.pdf" download onClick={triggerLightPulse}>
-        Résumé <span>↓</span>
+        <small>PDF</small><b>Résumé</b><span>↓</span>
       </a>
 
       <section className="landing-hero" ref={heroRef}>
         <div className="landing-hero__frame">
           <div className="landing-page__mobile-identity">
+            <span className="landing-page__mobile-kicker">Portfolio / 2026</span>
             <strong>Evan Miller-Jones</strong>
-            <span>Portfolio · Product Builder &amp; Full-Stack Developer</span>
+            <span className="landing-page__mobile-role">Product Builder &amp; Full-Stack Developer</span>
           </div>
 
           <section
@@ -366,8 +367,9 @@ export default function HomePage() {
 
           <div className="landing-page__flank-row">
             <Link className="landing-page__flank-action" to="/projects">
-              <i>↗</i>
-              <span>Projects</span>
+              <i aria-hidden="true" />
+              <span><small>01</small><b>Selected Work</b></span>
+              <em aria-hidden="true">→</em>
             </Link>
 
             <div className="landing-page__swipe-hint" aria-hidden="true" ref={swipeHintRef}>
@@ -376,8 +378,9 @@ export default function HomePage() {
             </div>
 
             <Link className="landing-page__flank-action" to="/mystory">
-              <i>↗</i>
-              <span>My Story</span>
+              <i aria-hidden="true" />
+              <span><small>02</small><b>My Story</b></span>
+              <em aria-hidden="true">→</em>
             </Link>
           </div>
         </div>
