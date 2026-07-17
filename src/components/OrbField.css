@@ -4,6 +4,15 @@
 @media (max-width: 760px) {
   /* The home page becomes a real scrolling document on mobile (see
      HomePage.css) -- pin the orb canvas to the viewport instead of
-     letting it scroll away with the rest of the page content. */
-  .orb-field { position: fixed; }
+     letting it scroll away with the rest of the page content.
+
+     Sized with `100svh` (small viewport height) instead of `inset: 0`
+     deliberately: `inset: 0` on a fixed element tracks the browser's
+     *live* viewport, which grows the moment the address bar collapses
+     on the first scroll -- that mid-gesture resize forces Three.js to
+     recompute the camera's aspect ratio, which reads as the scene
+     abruptly zooming right as you start scrolling. `100svh` is the
+     smallest the viewport ever is (chrome fully visible), so the
+     canvas never has to resize out from under the animation. */
+  .orb-field { position: fixed; inset: auto; top: 0; left: 0; width: 100vw; height: 100svh; }
 }

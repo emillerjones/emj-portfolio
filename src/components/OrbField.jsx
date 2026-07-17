@@ -273,6 +273,16 @@ function useOrbFieldData(mobile) {
       realBulbs.push(bulb);
     }
 
+    // On mobile, the first couple of lights to come on should land
+    // somewhere pleasant -- a little above center, up into the upper
+    // third -- rather than wherever the depth-biased sort above happened
+    // to put them. This only reorders *when* an already-chosen bulb
+    // lights up (its threshold), not which bulbs were chosen as sources.
+    if (mobile) {
+      const idealY = 0.35;
+      realBulbs.sort((a, b) => Math.abs(a.projected.y - idealY) - Math.abs(b.projected.y - idealY));
+    }
+
     realBulbs.forEach((bulb, index) => {
       const threshold = (index + 0.5) / realBulbs.length;
       bulb.threshold = threshold;
