@@ -120,14 +120,19 @@ export default function HomePage() {
   // across that whole tall box; lights and the text animation each
   // derive their own, faster-completing fraction from it.
   //
-  // The hero text/hint transform+opacity are written straight to the
-  // DOM via refs instead of through React state: routing a value that
-  // changes every scroll frame through setState forces a full component
-  // re-render each time, which is where the choppiness on mobile was
-  // coming from -- the buttons and hint's own bounce animation never
-  // touched React state, which is exactly why *they* stayed smooth.
+  // The hero text/hint motion is handled by a native CSS scroll-driven
+  // animation where supported (see the @supports block in HomePage.css)
+  // -- that runs on the compositor thread, immune to main-thread/JS
+  // timing, which is the only way to actually match native scroll's
+  // smoothness. Any JS approach here (state, refs, rAF -- all tried)
+  // still has to wait for a `scroll` event to fire and a callback to
+  // run before it can paint, and that round trip is what reads as
+  // "choppy" next to elements (like the flanking buttons) that scroll
+  // natively and never touch JS at all. The ref-writing fallback below
+  // only runs on browsers that lack scroll-timeline support.
   useEffect(() => {
     if (!mobile) return;
+    const supportsScrollTimeline = typeof CSS !== "undefined" && CSS.supports?.("(animation-timeline: scroll())");
     let ticking = false;
     const update = () => {
       ticking = false;
@@ -140,11 +145,12 @@ export default function HomePage() {
         setLightsOn(nextLights);
       }
 
+      if (supportsScrollTimeline) return;
+
       const textFraction = Math.min(1, fraction / 0.3);
       if (contentRef.current) {
         contentRef.current.style.transform = `translateY(${-textFraction * 46}vh)`;
         contentRef.current.style.opacity = String(Math.max(0, 1 - textFraction));
-        contentRef.current.style.pointerEvents = textFraction > 0.8 ? "none" : "";
       }
       if (swipeHintRef.current) {
         swipeHintRef.current.style.opacity = String(Math.max(0, 1 - fraction / 0.12));
