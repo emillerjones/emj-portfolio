@@ -90,7 +90,7 @@ export default function Hero() {
     <section className="hero" id="hero">
       <div className="hero-main">
         <div className={`hero-titlecard${titleIn ? " is-in" : ""}`}>
-          <p className="hero-eyebrow">Full Stack Developer &middot; Texas</p>
+          <p className="hero-eyebrow">Full-Stack Developer &amp; Product Builder &middot; Texas</p>
           <span className="hero-rule" aria-hidden="true" />
 
           <h1 className="hero-headline">
@@ -102,11 +102,17 @@ export default function Hero() {
 
         <div className={`hero-reveal${restIn ? " is-in" : ""}`}>
           <p className="hero-scope">
-            A decade across government, healthcare, and independent software &mdash; solving real-world problems.
+            The tools changed. The work stayed the same: understand the real process, find the friction, and build a better system.
           </p>
 
           <span className="hero-rule" aria-hidden="true" />
-          <p className="hero-thesis">One problem. One chapter. One lesson at a time.</p>
+          <ol className="hero-process" aria-label="How I build products">
+            <li><span>01</span>Work close to the process</li>
+            <li><span>02</span>Notice lost time or context</li>
+            <li><span>03</span>Understand the workflow</li>
+            <li><span>04</span>Build a better system</li>
+            <li><span>05</span>Watch, learn, and improve</li>
+          </ol>
 
           <div className="hero-actions">
             <a href="#paper-records" className="btn btn--primary">Begin &rarr;</a>

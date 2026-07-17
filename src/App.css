@@ -30,7 +30,7 @@
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html {
   scroll-behavior: smooth;
-  scroll-snap-type: y proximity;
+  scroll-snap-type: none;
 }
 body {
   background: var(--bg);
@@ -253,6 +253,29 @@ main { position: relative; }
   border-left: 1px solid var(--border-md);
   max-width: 46ch;
 }
+.hero-process {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 8px 20px;
+  max-width: 570px;
+  padding-left: 18px;
+  border-left: 1px solid var(--border-md);
+}
+.hero-process li {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  color: var(--text-2);
+  font-size: 11px;
+  line-height: 1.45;
+}
+.hero-process li span {
+  color: var(--accent);
+  font-size: 8px;
+  font-weight: 750;
+  letter-spacing: 0.08em;
+}
+.hero-process li:last-child { grid-column: 1 / -1; }
 .hero-actions {
   display: flex;
   gap: 14px;
@@ -489,7 +512,7 @@ main { position: relative; }
 
 @media (max-width: 640px) {
   html {
-    scroll-snap-type: y proximity;
+    scroll-snap-type: none;
   }
   .hero {
     min-height: 100svh;
@@ -514,6 +537,8 @@ main { position: relative; }
     left: 5%;
     right: 5%;
   }
+  .hero-process { grid-template-columns: 1fr; gap: 6px; }
+  .hero-process li:last-child { grid-column: auto; }
 }
 
 @media (prefers-reduced-motion: reduce) {

@@ -1,0 +1,7 @@
+.story-page { position: relative; min-height: 100svh; background: #000; }
+.story-page .hero { padding-top: calc(5vh + 74px); }
+.story-page .constellation { top: calc(5vh + 62px); height: calc(90vh - 62px); }
+
+@media (max-width: 640px) {
+  .story-page .hero { padding-top: 102px; }
+}

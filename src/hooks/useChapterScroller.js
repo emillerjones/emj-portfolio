@@ -1,6 +1,5 @@
 import { useEffect, useRef } from "react";
 
-const SCROLL_LOCK_MS = 900;
 const WHEEL_THRESHOLD = 28;
 
 function canUseMotion() {
@@ -50,6 +49,7 @@ function canScrollWithinSection(section, direction) {
 
 export function useChapterScroller(sectionIds) {
   const lockRef = useRef(false);
+  const unlockCleanupRef = useRef(null);
 
   useEffect(() => {
     if (!canUseMotion()) return undefined;
@@ -62,12 +62,40 @@ export function useChapterScroller(sectionIds) {
       if (sections.length === 0) return;
 
       const clamped = Math.max(0, Math.min(nextIndex, sections.length - 1));
+      const target = sections[clamped];
       lockRef.current = true;
-      sections[clamped].scrollIntoView({ behavior: "smooth", block: "start" });
+      unlockCleanupRef.current?.();
 
-      window.setTimeout(() => {
+      let frameId;
+      let safetyTimer;
+      let finished = false;
+
+      const unlock = () => {
+        if (finished) return;
+        finished = true;
         lockRef.current = false;
-      }, SCROLL_LOCK_MS);
+        window.cancelAnimationFrame(frameId);
+        window.clearTimeout(safetyTimer);
+        window.removeEventListener("scrollend", unlock);
+        unlockCleanupRef.current = null;
+      };
+
+      const watchTarget = () => {
+        if (Math.abs(target.getBoundingClientRect().top) <= 2) {
+          unlock();
+          return;
+        }
+        frameId = window.requestAnimationFrame(watchTarget);
+      };
+
+      window.addEventListener("scrollend", unlock, { once: true });
+      frameId = window.requestAnimationFrame(watchTarget);
+      // Safety only: releases the input if a browser cancels smooth scrolling
+      // without firing scrollend or ever landing exactly on the target.
+      safetyTimer = window.setTimeout(unlock, 1800);
+      unlockCleanupRef.current = unlock;
+
+      target.scrollIntoView({ behavior: "smooth", block: "start" });
     };
 
     const onWheel = (event) => {
@@ -114,6 +142,7 @@ export function useChapterScroller(sectionIds) {
     window.addEventListener("keydown", onKeyDown);
 
     return () => {
+      unlockCleanupRef.current?.();
       window.removeEventListener("wheel", onWheel);
       window.removeEventListener("keydown", onKeyDown);
     };

@@ -19,7 +19,8 @@ export default function About() {
             Every lesson earned became another thread woven into the story you've just read.
           </p>
           <p>
-            Across every chapter, one theme slowly began to emerge.
+            Across every chapter, one way of working kept repeating: stay close to the real process,
+            notice where people lose time or context, understand the surrounding workflow, and build the better system.
           </p>
           <p className="about-thesis">            
             There has to be a better way.
@@ -28,8 +29,8 @@ export default function About() {
             Not simply a better way to write software, but a better way to solve the problem in front of us.
           </p>
           <p>
-            That belief continues to shape the way I approach every new challenge, every new project,
-            and every opportunity to leave things a little better than I found them.
+            That belief continues to shape every tool I build. Ship it, watch people use it,
+            and keep improving it until the software fits the work—not the other way around.
           </p>
           <p>
             But the story doesn't end here, the next chapter is ours to write together.
