@@ -19,7 +19,7 @@ export const GROUP_DEFS = [
 
 export const MAX_REAL_LIGHTS = {
   desktop: 20,
-  mobile: 10,
+  mobile: 15,
 };
 
 // Mobile halves the instance count and further thins the lightable

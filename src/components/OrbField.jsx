@@ -146,16 +146,19 @@ function makeField(count, litRatio) {
       Math.random() - 0.5,
       Math.random() - 0.5,
     ).normalize().multiplyScalar(speed);
+    const angularVelocity = [
+      (Math.random() - 0.5) * 0.16,
+      (Math.random() - 0.5) * 0.16,
+      (Math.random() - 0.5) * 0.16,
+    ];
     items.push({
       position: [x, y, z],
       homePosition: [x, y, z],
       velocity,
+      baseSpeed: speed,
       rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
-      angularVelocity: [
-        (Math.random() - 0.5) * 0.16,
-        (Math.random() - 0.5) * 0.16,
-        (Math.random() - 0.5) * 0.16,
-      ],
+      angularVelocity,
+      baseAngularVelocity: [...angularVelocity],
       scale: 0.045 + Math.random() * 0.15,
       lightable: false,
       powered: false,
@@ -487,12 +490,12 @@ function MotionController({ groups, enabled, stirSignal }) {
     const strength = stirSignal.strength;
     items.forEach((item, index) => {
       const wave = Math.sin(index * 1.618 + item.position[2] * 0.7);
-      item.velocity.x += direction * (0.18 + Math.abs(wave) * 0.16) * strength;
-      item.velocity.y += -direction * item.position[0] * 0.018 * strength;
-      item.velocity.z += wave * 0.11 * strength;
-      item.angularVelocity[1] += direction * 0.28 * strength;
-      item.angularVelocity[2] += wave * 0.2 * strength;
-      if (item.velocity.length() > 0.72) item.velocity.setLength(0.72);
+      item.velocity.x += direction * (0.38 + Math.abs(wave) * 0.3) * strength;
+      item.velocity.y += -direction * item.position[0] * 0.028 * strength;
+      item.velocity.z += wave * 0.2 * strength;
+      item.angularVelocity[1] += direction * 0.42 * strength;
+      item.angularVelocity[2] += wave * 0.3 * strength;
+      if (item.velocity.length() > 1.15) item.velocity.setLength(1.15);
     });
   }, [items, stirSignal]);
 
@@ -505,6 +508,16 @@ function MotionController({ groups, enabled, stirSignal }) {
     items.forEach((item) => {
       const position = item.position;
       const velocity = item.velocity;
+      const relaxedSpeed = THREE.MathUtils.damp(velocity.length(), item.baseSpeed, 0.55, delta);
+      velocity.setLength(relaxedSpeed);
+      for (let axis = 0; axis < 3; axis += 1) {
+        item.angularVelocity[axis] = THREE.MathUtils.damp(
+          item.angularVelocity[axis],
+          item.baseAngularVelocity[axis],
+          0.62,
+          delta,
+        );
+      }
       position[0] += velocity.x * delta;
       position[1] += velocity.y * delta;
       position[2] += velocity.z * delta;

@@ -17,7 +17,7 @@ export default function Nav() {
   }, [location.pathname]);
 
   return (
-    <header className="site-nav">
+    <header className={`site-nav${location.pathname === "/" ? " site-nav--home" : ""}`}>
       <NavLink to="/" className="site-nav__brand" aria-label="Evan Miller-Jones home" onClick={() => setOpen(false)}>
         <span>EMJ</span>
         <small>Full-Stack Developer · Product Builder</small>
