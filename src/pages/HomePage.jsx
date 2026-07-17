@@ -12,6 +12,7 @@ export default function HomePage() {
   const [lightsOn, setLightsOn] = useState(() => (mobile ? 1 : 0));
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
+  const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
   const ignitionLockRef = useRef(false);
@@ -51,15 +52,39 @@ export default function HomePage() {
 
   const handleTouchStart = (event) => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
-    touchStartRef.current = event.touches[0]?.clientY ?? null;
+    const touch = event.touches[0];
+    touchStartRef.current = touch ? {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastY: touch.clientY,
+      mode: null,
+    } : null;
   };
 
   const handleTouchMove = (event) => {
     if (touchStartRef.current === null) return;
-    const current = event.touches[0]?.clientY ?? touchStartRef.current;
-    const distance = touchStartRef.current - current;
+    const touch = event.touches[0];
+    if (!touch) return;
+    const gesture = touchStartRef.current;
+    const horizontal = touch.clientX - gesture.startX;
+    const vertical = touch.clientY - gesture.startY;
+
+    if (mobile && gesture.mode === null && Math.abs(horizontal) > 32 && Math.abs(horizontal) > Math.abs(vertical) * 1.15) {
+      gesture.mode = "horizontal";
+      setStirSignal((current) => ({
+        id: current.id + 1,
+        direction: horizontal > 0 ? 1 : -1,
+        strength: Math.min(1.35, 0.65 + Math.abs(horizontal) / 180),
+      }));
+      return;
+    }
+    if (gesture.mode === "horizontal") return;
+
+    gesture.mode = "vertical";
+    const distance = gesture.lastY - touch.clientY;
     if (Math.abs(distance) < 16) return;
-    touchStartRef.current = lightsOn === 0 && distance > 0 ? null : current;
+    if (lightsOn === 0 && distance > 0) touchStartRef.current = null;
+    else gesture.lastY = touch.clientY;
     setLightsOn((value) => Math.max(0, Math.min(totalLights, value + (distance > 0 ? 1 : -1))));
   };
 
@@ -86,7 +111,7 @@ export default function HomePage() {
           </div>
         )}
       >
-        <OrbField progress={lightProgress} orbProgress={orbProgress} motion={orbsMoving} />
+        <OrbField progress={lightProgress} orbProgress={orbProgress} motion={orbsMoving} stirSignal={stirSignal} />
       </Suspense>
 
       <section className="landing-page__content" aria-labelledby="landing-title">

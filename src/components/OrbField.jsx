@@ -478,8 +478,23 @@ function MovingAnchor({ item, renderOrder, children }) {
   return <group ref={ref} position={item.position} renderOrder={renderOrder}>{children}</group>;
 }
 
-function MotionController({ groups, enabled }) {
+function MotionController({ groups, enabled, stirSignal }) {
   const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
+
+  useEffect(() => {
+    if (!stirSignal?.id) return;
+    const direction = stirSignal.direction;
+    const strength = stirSignal.strength;
+    items.forEach((item, index) => {
+      const wave = Math.sin(index * 1.618 + item.position[2] * 0.7);
+      item.velocity.x += direction * (0.18 + Math.abs(wave) * 0.16) * strength;
+      item.velocity.y += -direction * item.position[0] * 0.018 * strength;
+      item.velocity.z += wave * 0.11 * strength;
+      item.angularVelocity[1] += direction * 0.28 * strength;
+      item.angularVelocity[2] += wave * 0.2 * strength;
+      if (item.velocity.length() > 0.72) item.velocity.setLength(0.72);
+    });
+  }, [items, stirSignal]);
 
   useFrame((state, frameDelta) => {
     if (!enabled) return;
@@ -683,7 +698,7 @@ function useRevealDriver({ orbProgressRef, reducedMotion, onAssembled }) {
   return revealRef;
 }
 
-function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, onAssembled }) {
+function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSignal, onAssembled }) {
   const { groups, bulbs } = useOrbFieldData(mobile);
   const progressRef = useRef(progress);
   useEffect(() => {
@@ -703,7 +718,7 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, onAsse
       <BackWall progressRef={progressRef} mobile={mobile} />
       <AdaptiveSceneLight progressRef={progressRef} />
       <DriftGroup mobile={mobile} reducedMotion={reducedMotion}>
-        <MotionController groups={groups} enabled={motion && !reducedMotion} />
+        <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} />
         <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} />
 
         {groups.map((group) => (
@@ -728,7 +743,7 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, onAsse
   );
 }
 
-export default function OrbField({ progress, orbProgress = 1, motion = false, onAssembled = () => {} }) {
+export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, onAssembled = () => {} }) {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const reducedMotion = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
@@ -746,7 +761,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, on
         }}
       >
         <fog attach="fog" args={["#000000", 15, 42]} />
-        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} onAssembled={onAssembled} />
+        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} onAssembled={onAssembled} />
         <Stats showPanel={0} className="orb-field__stats" />
         <EffectComposer multisampling={2} disableNormalPass>
           <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={mobile ? 1.35 : 1.7} mipmapBlur radius={0.55} />
