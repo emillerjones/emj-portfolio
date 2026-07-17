@@ -33,6 +33,7 @@ export default function HomePage() {
   const contentRef = useRef(null);
   const swipeHintRef = useRef(null);
   const pulseFrameRef = useRef(null);
+  const fieldInteractionRef = useRef({ active: false, drag: 0, releaseId: 0, releasedAt: -Infinity });
 
   const stirField = (direction, strength) => {
     setStirSignal((current) => ({ id: current.id + 1, direction, strength }));
@@ -192,9 +193,16 @@ export default function HomePage() {
   }, [mobile]);
 
   const handleTouchStart = (event) => {
-    if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
+    if (event.target.closest?.("a, button, input")) return;
     const touch = event.touches[0];
-    touchStartRef.current = touch ? { startX: touch.clientX, startY: touch.clientY, mode: null } : null;
+    touchStartRef.current = touch ? {
+      startX: touch.clientX,
+      startY: touch.clientY,
+      lastX: touch.clientX,
+      lastTime: performance.now(),
+      velocity: 0,
+      mode: null,
+    } : null;
   };
 
   // Only the horizontal "stir the field" gesture is hand-tracked here --
@@ -203,39 +211,77 @@ export default function HomePage() {
   const handleTouchMove = (event) => {
     if (touchStartRef.current === null) return;
     const gesture = touchStartRef.current;
-    if (gesture.mode !== null) return;
     const touch = event.touches[0];
     if (!touch) return;
     const horizontal = touch.clientX - gesture.startX;
     const vertical = touch.clientY - gesture.startY;
+    const now = performance.now();
+    const elapsed = Math.max(8, now - gesture.lastTime);
+    gesture.velocity = (touch.clientX - gesture.lastX) / elapsed;
+    gesture.lastX = touch.clientX;
+    gesture.lastTime = now;
+
+    if (gesture.mode === "horizontal") {
+      fieldInteractionRef.current.drag = Math.max(-1, Math.min(1, horizontal / (window.innerWidth * 0.32)));
+      return;
+    }
+    if (gesture.mode === "vertical") return;
     if (Math.abs(horizontal) > 32 && Math.abs(horizontal) > Math.abs(vertical) * 1.15) {
       gesture.mode = "horizontal";
-      stirField(horizontal > 0 ? 1 : -1, Math.min(1.55, 0.85 + Math.abs(horizontal) / 160));
+      fieldInteractionRef.current.active = true;
+      fieldInteractionRef.current.drag = Math.max(-1, Math.min(1, horizontal / (window.innerWidth * 0.32)));
     } else if (Math.abs(vertical) > 12) {
       gesture.mode = "vertical";
     }
   };
 
   const handleTouchEnd = () => {
+    const gesture = touchStartRef.current;
+    if (gesture?.mode === "horizontal") {
+      const drag = fieldInteractionRef.current.drag;
+      const direction = Math.sign(gesture.velocity || drag) || 1;
+      const strength = Math.min(1.8, 0.85 + Math.abs(gesture.velocity) * 0.7 + Math.abs(drag) * 0.45);
+      fieldInteractionRef.current.active = false;
+      fieldInteractionRef.current.releaseId += 1;
+      fieldInteractionRef.current.releasedAt = performance.now();
+      stirField(direction, strength);
+      navigator.vibrate?.(8);
+    }
     touchStartRef.current = null;
   };
 
   const handlePointerDown = (event) => {
     if (event.pointerType !== "mouse" || event.target.closest("a, button, input")) return;
-    pointerStartRef.current = { x: event.clientX, triggered: false };
+    pointerStartRef.current = { x: event.clientX, lastX: event.clientX, lastTime: performance.now(), velocity: 0 };
+    fieldInteractionRef.current.active = true;
     event.currentTarget.setPointerCapture(event.pointerId);
   };
 
   const handlePointerMove = (event) => {
     const gesture = pointerStartRef.current;
-    if (!gesture || gesture.triggered || event.buttons !== 1) return;
+    if (!gesture || event.buttons !== 1) return;
     const distance = event.clientX - gesture.x;
-    if (Math.abs(distance) < 36) return;
-    gesture.triggered = true;
-    stirField(distance > 0 ? 1 : -1, Math.min(1.65, 0.95 + Math.abs(distance) / 220));
+    const now = performance.now();
+    const elapsed = Math.max(8, now - gesture.lastTime);
+    gesture.velocity = (event.clientX - gesture.lastX) / elapsed;
+    gesture.lastX = event.clientX;
+    gesture.lastTime = now;
+    fieldInteractionRef.current.drag = Math.max(-1, Math.min(1, distance / (window.innerWidth * 0.24)));
   };
 
   const handlePointerEnd = () => {
+    const gesture = pointerStartRef.current;
+    if (gesture) {
+      const drag = fieldInteractionRef.current.drag;
+      if (Math.abs(drag) > 0.06) {
+        const direction = Math.sign(gesture.velocity || drag) || 1;
+        const strength = Math.min(1.8, 0.85 + Math.abs(gesture.velocity) * 0.65 + Math.abs(drag) * 0.5);
+        fieldInteractionRef.current.releaseId += 1;
+        fieldInteractionRef.current.releasedAt = performance.now();
+        stirField(direction, strength);
+      }
+    }
+    fieldInteractionRef.current.active = false;
     pointerStartRef.current = null;
   };
 
@@ -268,6 +314,7 @@ export default function HomePage() {
           orbProgress={orbProgress}
           motion={orbsMoving}
           stirSignal={stirSignal}
+          interactionRef={fieldInteractionRef}
           onReady={() => setSceneReady(true)}
         />
       </Suspense>
@@ -312,7 +359,7 @@ export default function HomePage() {
 
             <div className="landing-page__swipe-hint" aria-hidden="true" ref={swipeHintRef}>
               <i />
-              <span>Swipe up for more</span>
+              <span>Swipe up · drag sideways</span>
             </div>
 
             <Link className="landing-page__flank-action" to="/mystory">

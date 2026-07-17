@@ -341,6 +341,14 @@
   .landing-page__footer { bottom: 14px; }
 }
 
+@media (min-width: 761px) and (hover: hover) {
+  .landing-page { cursor: grab; }
+  .landing-page:active { cursor: grabbing; }
+  .landing-page a,
+  .landing-page button,
+  .landing-page input { cursor: pointer; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .landing-control small { display: none; }
   .landing-page__swipe-hint i { animation: none; }

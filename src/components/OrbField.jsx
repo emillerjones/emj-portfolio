@@ -385,7 +385,7 @@ function AssemblingInstances({ items, geometry, material, revealRef, reducedMoti
 // read as "on" (its surface is simply close to a bright real light),
 // and its falloff is what lights up whatever orbs happen to be nearby --
 // the solar-system effect, not a fake glow shader.
-function LightBulbs({ items, reducedMotion, progressRef, limit }) {
+function LightBulbs({ items, reducedMotion, progressRef, interactionRef, limit }) {
   const lightRefs = useRef([]);
   const intensitiesRef = useRef(null);
   if (intensitiesRef.current === null) {
@@ -394,6 +394,8 @@ function LightBulbs({ items, reducedMotion, progressRef, limit }) {
 
   useFrame((state, delta) => {
     const progress = progressRef.current;
+    const releasedAt = interactionRef?.current?.releasedAt ?? -Infinity;
+    const flash = Math.exp(-(performance.now() - releasedAt) / 190);
     const intensities = intensitiesRef.current;
     const factor = reducedMotion ? 60 : 3.2;
     const activeCount = Math.round(progress * items.length);
@@ -408,7 +410,7 @@ function LightBulbs({ items, reducedMotion, progressRef, limit }) {
         light.position.set(...item.position);
         light.color.set(item.color);
         light.distance = item.reach * 1.75;
-        light.intensity = next * item.power * 2.35;
+        light.intensity = next * item.power * 2.35 * (1 + flash * 0.38);
       } else {
         light.intensity = 0;
       }
@@ -592,7 +594,7 @@ function MotionController({ groups, enabled, stirSignal }) {
   return null;
 }
 
-function AdaptiveSceneLight({ progressRef }) {
+function AdaptiveSceneLight({ progressRef, interactionRef }) {
   const ambientRef = useRef();
   const directionalRef = useRef();
   const hemisphereRef = useRef();
@@ -602,10 +604,12 @@ function AdaptiveSceneLight({ progressRef }) {
 
   useFrame(() => {
     const progress = progressRef.current;
+    const releasedAt = interactionRef?.current?.releasedAt ?? -Infinity;
+    const flash = Math.exp(-(performance.now() - releasedAt) / 190);
     const exposure = progress <= 0 ? 0 : 0.34 + 0.66 * Math.pow(progress, 0.72);
-    ambientRef.current.intensity = THREE.MathUtils.lerp(0.075, 0.48, exposure);
-    directionalRef.current.intensity = THREE.MathUtils.lerp(0, 0.42, exposure);
-    hemisphereRef.current.intensity = THREE.MathUtils.lerp(0, 0.2, exposure);
+    ambientRef.current.intensity = THREE.MathUtils.lerp(0.075, 0.48, exposure) * (1 + flash * 0.16);
+    directionalRef.current.intensity = THREE.MathUtils.lerp(0, 0.42, exposure) * (1 + flash * 0.22);
+    hemisphereRef.current.intensity = THREE.MathUtils.lerp(0, 0.2, exposure) * (1 + flash * 0.18);
     color.lerpColors(night, illuminated, exposure);
     ambientRef.current.color.copy(color);
   });
@@ -685,13 +689,20 @@ function OrbGeometry({ type }) {
   }
 }
 
-function DriftGroup({ mobile, reducedMotion, children }) {
+function DriftGroup({ mobile, reducedMotion, interactionRef, children }) {
   const groupRef = useRef();
-  useFrame((state) => {
+  const dragRef = useRef(0);
+  useFrame((state, delta) => {
     if (!groupRef.current || reducedMotion) return;
     const time = state.clock.elapsedTime;
-    groupRef.current.rotation.y = Math.sin(time * 0.045) * 0.05;
+    const interaction = interactionRef?.current;
+    const targetDrag = interaction?.active ? interaction.drag : 0;
+    dragRef.current = THREE.MathUtils.damp(dragRef.current, targetDrag, interaction?.active ? 13 : 3.4, delta);
+    const drag = dragRef.current;
+    groupRef.current.position.x = (mobile ? 0 : 2.1) + drag * (mobile ? 0.85 : 1.15);
+    groupRef.current.rotation.y = Math.sin(time * 0.045) * 0.05 + drag * 0.13;
     groupRef.current.rotation.x = Math.sin(time * 0.03) * 0.02;
+    groupRef.current.rotation.z = -drag * 0.055;
   });
   return (
     <group ref={groupRef} position={[mobile ? 0 : 2.1, mobile ? 0.6 : 0, 0]}>
@@ -723,7 +734,7 @@ function useRevealDriver({ orbProgressRef, reducedMotion, onAssembled }) {
   return revealRef;
 }
 
-function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSignal, onAssembled }) {
+function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSignal, interactionRef, onAssembled }) {
   const { groups, bulbs } = useOrbFieldData(mobile);
   const progressRef = useRef(progress);
   useEffect(() => {
@@ -741,10 +752,10 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
   return (
     <>
       <BackWall progressRef={progressRef} mobile={mobile} />
-      <AdaptiveSceneLight progressRef={progressRef} />
-      <DriftGroup mobile={mobile} reducedMotion={reducedMotion}>
+      <AdaptiveSceneLight progressRef={progressRef} interactionRef={interactionRef} />
+      <DriftGroup mobile={mobile} reducedMotion={reducedMotion} interactionRef={interactionRef}>
         <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} />
-        <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} />
+        <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} interactionRef={interactionRef} />
 
         {groups.map((group) => (
           <AssemblingInstances
@@ -768,7 +779,7 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
   );
 }
 
-export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, onReady = () => {}, onAssembled = () => {} }) {
+export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, interactionRef = null, onReady = () => {}, onAssembled = () => {} }) {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const reducedMotion = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
@@ -787,7 +798,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, st
         }}
       >
         <fog attach="fog" args={["#000000", 15, 42]} />
-        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} onAssembled={onAssembled} />
+        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} interactionRef={interactionRef} onAssembled={onAssembled} />
         <EffectComposer multisampling={2} disableNormalPass>
           <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={mobile ? 1.35 : 1.7} mipmapBlur radius={0.55} />
         </EffectComposer>
