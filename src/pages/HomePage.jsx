@@ -362,15 +362,17 @@ export default function HomePage() {
         />
       </Suspense>
 
-      <a
-        className="landing-resume-pill"
-        href="/resume.pdf"
-        download
-        onPointerDown={triggerSceneFlare}
-        onClick={triggerLightPulse}
-      >
-        <b>Résumé</b>
-      </a>
+      {mobile && (
+        <a
+          className="landing-resume-pill"
+          href="/resume.pdf"
+          download
+          onPointerDown={triggerSceneFlare}
+          onClick={triggerLightPulse}
+        >
+          <b>Résumé</b>
+        </a>
+      )}
 
       <section className="landing-hero" ref={heroRef}>
         <div className="landing-hero__frame">
