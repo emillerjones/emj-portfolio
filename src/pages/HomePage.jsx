@@ -366,9 +366,9 @@ export default function HomePage() {
             ref={contentRef}
           >
             <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
-            <h1 id="landing-title">Understand the problem.<br />Build the right software.</h1>
+            <h1 id="landing-title">Software should fit the way people actually work.</h1>
             <p className="landing-page__intro">
-              I work close to real processes—spot where people lose time or context, understand the workflow, build a better system, then watch it work and improve it.
+              I study real workflows, find where people lose time or context, then design software that makes the work simpler.
             </p>
             <ol className="landing-page__method" aria-label="Product building process">
               <li><small>01</small><span>Notice the friction</span></li>
