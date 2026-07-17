@@ -3,21 +3,15 @@ import { Link } from "react-router-dom";
 import { estimateOrbLightCount, estimateOrbTotalCount } from "../components/orbFieldConfig";
 import "./HomePage.css";
 
-const Corridor = lazy(() => import("../components/Corridor"));
 const OrbField = lazy(() => import("../components/OrbField"));
-const SCENES = [
-  { id: "orbs", label: "Orbs" },
-  { id: "corridor", label: "Corridor" },
-];
 
 export default function HomePage() {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const totalLights = useMemo(() => estimateOrbLightCount(mobile), [mobile]);
   const totalOrbs = useMemo(() => estimateOrbTotalCount(mobile), [mobile]);
-  const [lightsOn, setLightsOn] = useState(0);
+  const [lightsOn, setLightsOn] = useState(() => (mobile ? 1 : 0));
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
-  const [scene, setScene] = useState("orbs");
-  const [orbsMoving, setOrbsMoving] = useState(false);
+  const [orbsMoving, setOrbsMoving] = useState(true);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
   const ignitionLockRef = useRef(false);
@@ -74,13 +68,11 @@ export default function HomePage() {
   };
 
   const lightProgress = totalLights > 0 ? lightsOn / totalLights : 0;
-  const backgroundLift = lightsOn === 0 ? 0 : 0.34 + 0.66 * Math.pow(lightProgress, 0.72);
   const orbProgress = totalOrbs > 0 ? orbsOn / totalOrbs : 1;
 
   return (
     <main
       className="landing-page"
-      style={{ "--light-progress": backgroundLift }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -94,25 +86,8 @@ export default function HomePage() {
           </div>
         )}
       >
-        {scene === "corridor" ? (
-          <Corridor progress={lightProgress} />
-        ) : (
-          <OrbField progress={lightProgress} orbProgress={orbProgress} motion={orbsMoving} />
-        )}
+        <OrbField progress={lightProgress} orbProgress={orbProgress} motion={orbsMoving} />
       </Suspense>
-
-      <div className="landing-scene-toggle" role="group" aria-label="Background scene">
-        {SCENES.map((option) => (
-          <button
-            key={option.id}
-            type="button"
-            className={option.id === scene ? "is-active" : ""}
-            onClick={() => setScene(option.id)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
 
       <section className="landing-page__content" aria-labelledby="landing-title">
         <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
@@ -133,28 +108,24 @@ export default function HomePage() {
       </section>
 
       <div className="landing-controls">
-        {scene === "orbs" && (
-          <>
-            <label className="landing-control">
-              <span><b>Orbs</b><output>{orbsOn} / {totalOrbs}</output></span>
-              <input
-                type="range"
-                min={0}
-                max={totalOrbs}
-                step="1"
-                value={orbsOn}
-                onChange={(event) => setOrbsOn(Number(event.target.value))}
-              />
-            </label>
-            <div className="landing-motion-control">
-              <b>Orbs in motion</b>
-              <div role="group" aria-label="Orbs in motion">
-                <button type="button" className={orbsMoving ? "is-active" : ""} onClick={() => setOrbsMoving(true)}>Yes</button>
-                <button type="button" className={!orbsMoving ? "is-active" : ""} onClick={() => setOrbsMoving(false)}>No</button>
-              </div>
-            </div>
-          </>
-        )}
+        <label className="landing-control">
+          <span><b>Orbs</b><output>{orbsOn} / {totalOrbs}</output></span>
+          <input
+            type="range"
+            min={0}
+            max={totalOrbs}
+            step="1"
+            value={orbsOn}
+            onChange={(event) => setOrbsOn(Number(event.target.value))}
+          />
+        </label>
+        <div className="landing-motion-control">
+          <b>Orbs in motion</b>
+          <div role="group" aria-label="Orbs in motion">
+            <button type="button" className={orbsMoving ? "is-active" : ""} onClick={() => setOrbsMoving(true)}>Yes</button>
+            <button type="button" className={!orbsMoving ? "is-active" : ""} onClick={() => setOrbsMoving(false)}>No</button>
+          </div>
+        </div>
         <label className="landing-control">
           <span><b>Lights</b><output>{lightsOn} / {totalLights}</output></span>
           <input

@@ -392,8 +392,8 @@ function LightBulbs({ items, reducedMotion, progressRef, limit }) {
       if (item) {
         light.position.set(...item.position);
         light.color.set(item.color);
-        light.distance = item.reach;
-        light.intensity = next * item.power * 1.8;
+        light.distance = item.reach * 1.75;
+        light.intensity = next * item.power * 2.35;
       } else {
         light.intensity = 0;
       }
@@ -579,6 +579,53 @@ function AdaptiveSceneLight({ progressRef }) {
   );
 }
 
+function makeWallTexture() {
+  const size = 192;
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+  const context = canvas.getContext("2d");
+  context.fillStyle = "#aeb5bd";
+  context.fillRect(0, 0, size, size);
+  for (let i = 0; i < 2600; i += 1) {
+    const shade = 105 + Math.random() * 105;
+    context.fillStyle = `rgba(${shade},${shade},${shade},${0.025 + Math.random() * 0.07})`;
+    context.fillRect(Math.random() * size, Math.random() * size, 0.5 + Math.random(), 0.5 + Math.random());
+  }
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(7, 5);
+  texture.anisotropy = 8;
+  return texture;
+}
+
+function BackWall({ progressRef, mobile }) {
+  const texture = useMemo(() => makeWallTexture(), []);
+  const materialRef = useRef();
+  const black = useMemo(() => new THREE.Color("#000000"), []);
+  const litWall = useMemo(() => new THREE.Color("#34485e"), []);
+  const color = useMemo(() => new THREE.Color(), []);
+
+  useFrame(() => {
+    if (!materialRef.current) return;
+    const progress = progressRef.current;
+    const oneLight = 1 / (mobile ? MAX_REAL_LIGHTS.mobile : MAX_REAL_LIGHTS.desktop);
+    const wallProgress = THREE.MathUtils.clamp((progress - oneLight) / (1 - oneLight), 0, 1);
+    const exposure = wallProgress <= 0 ? 0 : 0.24 + 0.76 * Math.pow(wallProgress, 0.72);
+    color.lerpColors(black, litWall, exposure);
+    materialRef.current.color.copy(color);
+  });
+
+  return (
+    <mesh position={[0, 0, -14.2]}>
+      <planeGeometry args={[60, 38, 1, 1]} />
+      <meshStandardMaterial ref={materialRef} color="#000000" map={texture} roughness={0.91} metalness={0.015} />
+    </mesh>
+  );
+}
+
 function OrbGeometry({ type }) {
   switch (type) {
     case "slate":
@@ -652,30 +699,32 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, onAsse
   const spillLightLimit = bulbs.length;
 
   return (
-    <DriftGroup mobile={mobile} reducedMotion={reducedMotion}>
-      <MotionController groups={groups} enabled={motion && !reducedMotion} />
+    <>
+      <BackWall progressRef={progressRef} mobile={mobile} />
       <AdaptiveSceneLight progressRef={progressRef} />
+      <DriftGroup mobile={mobile} reducedMotion={reducedMotion}>
+        <MotionController groups={groups} enabled={motion && !reducedMotion} />
+        <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} />
 
-      <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} />
+        {groups.map((group) => (
+          <AssemblingInstances
+            key={group.key}
+            items={group.items}
+            revealRef={revealRef}
+            reducedMotion={reducedMotion}
+            progressRef={progressRef}
+            motionEnabled={motion && !reducedMotion}
+            geometry={<OrbGeometry type={group.key} />}
+            material={<OrbMaterial group={group} />}
+          />
+        ))}
 
-      {groups.map((group) => (
-        <AssemblingInstances
-          key={group.key}
-          items={group.items}
-          revealRef={revealRef}
-          reducedMotion={reducedMotion}
-          progressRef={progressRef}
-          motionEnabled={motion && !reducedMotion}
-          geometry={<OrbGeometry type={group.key} />}
-          material={<OrbMaterial group={group} />}
-        />
-      ))}
-
-      {/* These must render after the opaque orb field. Otherwise the dark
-          source orb overwrites the bright body and leaves only a ring. */}
-      <BulbCores items={bulbs} progress={progress} />
-      <BulbHalos items={bulbs} progress={progress} />
-    </DriftGroup>
+        {/* These must render after the opaque orb field. Otherwise the dark
+            source orb overwrites the bright body and leaves only a ring. */}
+        <BulbCores items={bulbs} progress={progress} />
+        <BulbHalos items={bulbs} progress={progress} />
+      </DriftGroup>
+    </>
   );
 }
 
@@ -696,7 +745,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, on
           gl.toneMappingExposure = 1.0;
         }}
       >
-        <fog attach="fog" args={["#020307", 15, 42]} />
+        <fog attach="fog" args={["#000000", 15, 42]} />
         <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} onAssembled={onAssembled} />
         <Stats showPanel={0} className="orb-field__stats" />
         <EffectComposer multisampling={2} disableNormalPass>

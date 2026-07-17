@@ -77,7 +77,8 @@
 .site-nav__menu { display: none; }
 
 @media (max-width: 720px) {
-  .site-nav { height: 66px; padding: 0 20px; }
+  .site-nav { height: 66px; padding: 0 20px; justify-content: flex-end; }
+  .site-nav__brand { display: none; }
   .site-nav__brand small { display: none; }
   .site-nav__menu {
     display: flex;

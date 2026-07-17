@@ -9,18 +9,6 @@
     linear-gradient(160deg, #010205 0%, #030407 55%, #000 100%);
   touch-action: none;
 }
-.landing-page::before {
-  content: "";
-  position: absolute;
-  z-index: 0;
-  inset: 0;
-  background:
-    radial-gradient(circle at 68% 46%, #60758e 0%, #27374a 35%, transparent 72%),
-    linear-gradient(160deg, #1f2b39, #0d1420 62%, #080b11);
-  opacity: calc(var(--light-progress, 0) * 0.42);
-  pointer-events: none;
-  transition: opacity 500ms ease;
-}
 
 .landing-page__paper {
   position: absolute;
@@ -56,34 +44,6 @@
 .landing-page__actions a span { margin-left: 7px; color: var(--accent); }
 .landing-page__actions .landing-page__primary { padding: 13px 19px; color: #0c0d10; background: var(--accent); border-radius: 3px; box-shadow: 0 8px 25px rgb(159 195 238 / 18%); }
 .landing-page__actions .landing-page__primary:hover { background: var(--accent-hover); transform: translateY(-1px); }
-
-.landing-scene-toggle {
-  position: absolute;
-  z-index: 12;
-  top: calc(74px + clamp(16px, 3vw, 28px));
-  right: clamp(24px, 5vw, 80px);
-  display: flex;
-  gap: 2px;
-  padding: 3px;
-  background: rgb(255 255 255 / 6%);
-  border: 1px solid var(--border-md);
-  border-radius: 5px;
-}
-.landing-scene-toggle button {
-  padding: 6px 13px;
-  color: var(--text-3);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  background: transparent;
-  border: 0;
-  border-radius: 3px;
-  cursor: pointer;
-  transition: 180ms ease;
-}
-.landing-scene-toggle button:hover { color: var(--text); }
-.landing-scene-toggle button.is-active { color: #0c0d10; background: var(--accent); }
 
 .landing-controls {
   position: absolute;
@@ -166,18 +126,17 @@
 
 @media (max-width: 760px) {
   .landing-page { height: 100svh; }
-  .landing-page__content { top: auto; right: 22px; bottom: 13vh; left: 22px; width: auto; transform: none; }
+  .landing-page__content { top: auto; right: 22px; bottom: 7vh; left: 22px; width: auto; transform: none; }
   .landing-page__eyebrow { margin-bottom: 12px; font-size: 8px; }
-  .landing-page h1 { font-size: clamp(34px, 9.4vw, 48px); }
-  .landing-page__intro { margin-top: 14px; font-size: 12px; line-height: 1.5; }
-  .landing-page__method { gap: 13px; margin-top: 13px; }
+  .landing-page__eyebrow,
+  .landing-page__intro,
+  .landing-page__method { display: none; }
+  .landing-page h1 { font-size: clamp(31px, 8.6vw, 43px); }
   .landing-page__method li { gap: 4px; font-size: 7px; }
   .landing-page__actions { margin-top: 18px; gap: 10px 18px; }
   .landing-page__actions a { font-size: 9px; }
   .landing-page__actions .landing-page__primary { padding: 11px 15px; }
-  .landing-scene-toggle { top: 78px; right: 22px; }
-  .landing-scene-toggle button { padding: 5px 10px; font-size: 9px; }
-  .landing-controls { right: 22px; bottom: 4vh; left: 22px; width: auto; gap: 14px; }
+  .landing-controls { display: none; }
   .landing-control > span { margin-bottom: 5px; }
   .landing-control output { font-size: 17px; }
   .landing-control small { display: none; }
