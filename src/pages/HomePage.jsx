@@ -15,14 +15,16 @@ export default function HomePage() {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const totalLights = useMemo(() => estimateOrbLightCount(mobile), [mobile]);
   const totalOrbs = useMemo(() => estimateOrbTotalCount(mobile), [mobile]);
-  const [lightsOn, setLightsOn] = useState(() => (mobile ? 4 : 1));
+  const [lightsOn, setLightsOn] = useState(() => (mobile ? 0 : 1));
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
   const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
   const [pulseProgress, setPulseProgress] = useState(0);
+  const [sceneReady, setSceneReady] = useState(false);
+  const [mobileIntroReady, setMobileIntroReady] = useState(() => !mobile);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
-  const lastLightsRef = useRef(mobile ? 4 : 1);
+  const lastLightsRef = useRef(mobile ? 0 : 1);
   const ignitionLockRef = useRef(false);
   const ignitionTimerRef = useRef(null);
   const touchStartRef = useRef(null);
@@ -71,6 +73,35 @@ export default function HomePage() {
   useEffect(() => () => {
     if (pulseFrameRef.current) cancelAnimationFrame(pulseFrameRef.current);
   }, []);
+
+  useEffect(() => {
+    if (!mobile || !sceneReady) return;
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      const reducedMotionFrame = requestAnimationFrame(() => {
+        lastLightsRef.current = totalLights;
+        setLightsOn(totalLights);
+        setMobileIntroReady(true);
+      });
+      return () => cancelAnimationFrame(reducedMotionFrame);
+    }
+
+    let frame;
+    const delay = 320;
+    const interval = 225;
+    const start = performance.now();
+    const tick = (now) => {
+      const elapsed = now - start;
+      if (elapsed >= delay) setMobileIntroReady(true);
+      const nextLights = Math.min(totalLights, Math.max(0, Math.floor((elapsed - delay) / interval)));
+      if (nextLights !== lastLightsRef.current) {
+        lastLightsRef.current = nextLights;
+        setLightsOn(nextLights);
+      }
+      if (nextLights < totalLights) frame = requestAnimationFrame(tick);
+    };
+    frame = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(frame);
+  }, [mobile, sceneReady, totalLights]);
 
   // Desktop: a single fixed screen, mouse wheel hijacked entirely to
   // drive the lights -- unchanged from before.
@@ -139,12 +170,6 @@ export default function HomePage() {
       const heroHeight = heroRef.current?.offsetHeight || window.innerHeight;
       const fraction = Math.max(0, Math.min(1, window.scrollY / heroHeight));
 
-      const nextLights = Math.max(4, Math.round(Math.min(1, fraction / 0.55) * totalLights));
-      if (nextLights !== lastLightsRef.current) {
-        lastLightsRef.current = nextLights;
-        setLightsOn(nextLights);
-      }
-
       if (supportsScrollTimeline) return;
 
       const textFraction = Math.min(1, fraction / 0.3);
@@ -164,7 +189,7 @@ export default function HomePage() {
     update();
     window.addEventListener("scroll", handleScroll, { passive: true });
     return () => window.removeEventListener("scroll", handleScroll);
-  }, [mobile, totalLights]);
+  }, [mobile]);
 
   const handleTouchStart = (event) => {
     if (event.target instanceof HTMLInputElement || event.target instanceof HTMLButtonElement) return;
@@ -220,7 +245,7 @@ export default function HomePage() {
 
   return (
     <main
-      className="landing-page"
+      className={`landing-page${mobileIntroReady ? " is-mobile-intro-ready" : ""}`}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -238,7 +263,13 @@ export default function HomePage() {
           </div>
         )}
       >
-        <OrbField progress={effectiveLightProgress} orbProgress={orbProgress} motion={orbsMoving} stirSignal={stirSignal} />
+        <OrbField
+          progress={effectiveLightProgress}
+          orbProgress={orbProgress}
+          motion={orbsMoving}
+          stirSignal={stirSignal}
+          onReady={() => setSceneReady(true)}
+        />
       </Suspense>
 
       <a className="landing-resume-pill" href="/resume.pdf" download onClick={triggerLightPulse}>

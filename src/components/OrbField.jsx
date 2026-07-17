@@ -768,7 +768,7 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
   );
 }
 
-export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, onAssembled = () => {} }) {
+export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, onReady = () => {}, onAssembled = () => {} }) {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const reducedMotion = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
@@ -783,6 +783,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, st
           gl.outputColorSpace = THREE.SRGBColorSpace;
           gl.toneMapping = THREE.ACESFilmicToneMapping;
           gl.toneMappingExposure = 1.0;
+          onReady();
         }}
       >
         <fog attach="fog" args={["#000000", 15, 42]} />
