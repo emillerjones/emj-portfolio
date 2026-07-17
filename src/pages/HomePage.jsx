@@ -11,7 +11,8 @@ const MOBILE_INTRO = {
   initialDelayMs: 320,
   lightIntervalMs: 225,
   interfaceRevealLight: 7,
-  interfaceFadeMs: 4500,
+  interfaceStageGapMs: 800,
+  interfaceFadeMs: 1900,
 };
 
 const FEATURED_PROJECTS = [
@@ -46,6 +47,12 @@ export default function HomePage() {
 
   const stirField = (direction, strength) => {
     setStirSignal((current) => ({ id: current.id + 1, direction, strength }));
+  };
+
+  const triggerSceneFlare = () => {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    fieldInteractionRef.current.releasedAt = performance.now();
+    navigator.vibrate?.(6);
   };
 
   // A one-off "every light briefly comes on" flourish for the résumé
@@ -304,7 +311,10 @@ export default function HomePage() {
   return (
     <main
       className={`landing-page${mobileIntroReady ? " is-mobile-intro-ready" : ""}`}
-      style={{ "--mobile-intro-fade-duration": `${MOBILE_INTRO.interfaceFadeMs}ms` }}
+      style={{
+        "--mobile-intro-fade-duration": `${MOBILE_INTRO.interfaceFadeMs}ms`,
+        "--mobile-intro-stage-gap": `${MOBILE_INTRO.interfaceStageGapMs}ms`,
+      }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
@@ -332,8 +342,14 @@ export default function HomePage() {
         />
       </Suspense>
 
-      <a className="landing-resume-pill" href="/resume.pdf" download onClick={triggerLightPulse}>
-        <small>PDF</small><b>Résumé</b><span>↓</span>
+      <a
+        className="landing-resume-pill"
+        href="/resume.pdf"
+        download
+        onPointerDown={triggerSceneFlare}
+        onClick={triggerLightPulse}
+      >
+        <b>Résumé</b>
       </a>
 
       <section className="landing-hero" ref={heroRef}>
@@ -350,9 +366,9 @@ export default function HomePage() {
             ref={contentRef}
           >
             <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
-            <h1 id="landing-title">Better software starts<br />with the real process.</h1>
+            <h1 id="landing-title">Understand the problem.<br />Build the right software.</h1>
             <p className="landing-page__intro">
-              I work close to the workflow—find where people lose time or context, understand the surrounding system, build something better, then watch real use and improve it.
+              I work close to real processes—spot where people lose time or context, understand the workflow, build a better system, then watch it work and improve it.
             </p>
             <ol className="landing-page__method" aria-label="Product building process">
               <li><small>01</small><span>Notice the friction</span></li>
@@ -366,21 +382,16 @@ export default function HomePage() {
           </section>
 
           <div className="landing-page__flank-row">
-            <Link className="landing-page__flank-action" to="/projects">
-              <i aria-hidden="true" />
-              <span><small>01</small><b>Selected Work</b></span>
-              <em aria-hidden="true">→</em>
+            <Link className="landing-page__flank-action" to="/projects" onPointerDown={triggerSceneFlare}>
+              <span>Selected Work</span>
             </Link>
 
             <div className="landing-page__swipe-hint" aria-hidden="true" ref={swipeHintRef}>
               <i />
-              <span>Swipe up · drag sideways</span>
             </div>
 
-            <Link className="landing-page__flank-action" to="/mystory">
-              <i aria-hidden="true" />
-              <span><small>02</small><b>My Story</b></span>
-              <em aria-hidden="true">→</em>
+            <Link className="landing-page__flank-action" to="/mystory" onPointerDown={triggerSceneFlare}>
+              <span>My Story</span>
             </Link>
           </div>
         </div>
