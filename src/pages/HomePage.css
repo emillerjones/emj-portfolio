@@ -173,7 +173,7 @@
      175svh-tall hero box". */
   .landing-hero__frame { height: 100svh; }
   .landing-hero__frame,
-  .landing-resume-pill { opacity: 0; pointer-events: none; transition: opacity 900ms ease; }
+  .landing-resume-pill { opacity: 0; pointer-events: none; transition: opacity var(--mobile-intro-fade-duration, 1500ms) ease; }
   .landing-page.is-mobile-intro-ready .landing-hero__frame,
   .landing-page.is-mobile-intro-ready .landing-resume-pill { opacity: 1; pointer-events: auto; }
   .landing-page__paper { display: none; }

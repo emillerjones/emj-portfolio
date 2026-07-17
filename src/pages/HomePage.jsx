@@ -5,6 +5,15 @@ import "./HomePage.css";
 
 const OrbField = lazy(() => import("../components/OrbField"));
 
+// Mobile entrance sequence. Keep its pacing controls together so the opening
+// light-up and interface reveal can be tuned without hunting through the page.
+const MOBILE_INTRO = {
+  initialDelayMs: 320,
+  lightIntervalMs: 225,
+  interfaceRevealLight: 6,
+  interfaceFadeMs: 1500,
+};
+
 const FEATURED_PROJECTS = [
   { tag: "Live product", name: "Horizon", result: "A full-stack raid calendar now tracking 28 guilds and 500+ raids." },
   { tag: "In development", name: "Wellness Recovery Community", result: "A public foundation for a nonprofit recovery community, built for trust and accessibility." },
@@ -87,17 +96,20 @@ export default function HomePage() {
     }
 
     let frame;
-    const delay = 320;
-    const interval = 225;
     const start = performance.now();
     const tick = (now) => {
       const elapsed = now - start;
-      const nextLights = Math.min(totalLights, Math.max(0, Math.floor((elapsed - delay) / interval)));
+      const nextLights = Math.min(
+        totalLights,
+        Math.max(0, Math.floor(
+          (elapsed - MOBILE_INTRO.initialDelayMs) / MOBILE_INTRO.lightIntervalMs,
+        )),
+      );
       if (nextLights !== lastLightsRef.current) {
         lastLightsRef.current = nextLights;
         setLightsOn(nextLights);
       }
-      if (nextLights >= 4) setMobileIntroReady(true);
+      if (nextLights >= MOBILE_INTRO.interfaceRevealLight) setMobileIntroReady(true);
       if (nextLights < totalLights) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);
@@ -292,6 +304,7 @@ export default function HomePage() {
   return (
     <main
       className={`landing-page${mobileIntroReady ? " is-mobile-intro-ready" : ""}`}
+      style={{ "--mobile-intro-fade-duration": `${MOBILE_INTRO.interfaceFadeMs}ms` }}
       onTouchStart={handleTouchStart}
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
