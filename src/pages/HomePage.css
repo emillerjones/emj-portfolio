@@ -173,9 +173,9 @@
      175svh-tall hero box". */
   .landing-hero__frame { height: 100svh; }
   .landing-hero__frame,
-  .landing-resume-pill { opacity: 0; transition: opacity 900ms ease; }
+  .landing-resume-pill { opacity: 0; pointer-events: none; transition: opacity 900ms ease; }
   .landing-page.is-mobile-intro-ready .landing-hero__frame,
-  .landing-page.is-mobile-intro-ready .landing-resume-pill { opacity: 1; }
+  .landing-page.is-mobile-intro-ready .landing-resume-pill { opacity: 1; pointer-events: auto; }
   .landing-page__paper { display: none; }
   .landing-page__mobile-identity { position: absolute; z-index: 12; top: max(18px, env(safe-area-inset-top)); left: 20px; display: grid; gap: 3px; text-shadow: 0 2px 16px #000; }
   .landing-page__mobile-identity strong { font-family: var(--display); font-size: 14px; letter-spacing: -0.01em; }

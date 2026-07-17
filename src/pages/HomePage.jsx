@@ -92,12 +92,12 @@ export default function HomePage() {
     const start = performance.now();
     const tick = (now) => {
       const elapsed = now - start;
-      if (elapsed >= delay) setMobileIntroReady(true);
       const nextLights = Math.min(totalLights, Math.max(0, Math.floor((elapsed - delay) / interval)));
       if (nextLights !== lastLightsRef.current) {
         lastLightsRef.current = nextLights;
         setLightsOn(nextLights);
       }
+      if (nextLights >= 4) setMobileIntroReady(true);
       if (nextLights < totalLights) frame = requestAnimationFrame(tick);
     };
     frame = requestAnimationFrame(tick);

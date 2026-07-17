@@ -495,7 +495,7 @@ function MovingAnchor({ item, renderOrder, children }) {
   return <group ref={ref} position={item.position} renderOrder={renderOrder}>{children}</group>;
 }
 
-function MotionController({ groups, enabled, stirSignal }) {
+function MotionController({ groups, enabled, stirSignal, interactionRef }) {
   const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
 
   useEffect(() => {
@@ -519,7 +519,7 @@ function MotionController({ groups, enabled, stirSignal }) {
     const cells = new Map();
     const cellSize = 0.42;
 
-    items.forEach((item) => {
+    items.forEach((item, index) => {
       const position = item.position;
       const velocity = item.velocity;
       const relaxedSpeed = THREE.MathUtils.damp(velocity.length(), item.baseSpeed, 0.55, delta);
@@ -531,6 +531,15 @@ function MotionController({ groups, enabled, stirSignal }) {
           0.62,
           delta,
         );
+      }
+      const interaction = interactionRef?.current;
+      if (interaction?.active) {
+        const depthInfluence = THREE.MathUtils.clamp((position[2] + 13.5) / 12, 0, 1);
+        const wave = Math.sin(index * 0.73 + position[1] * 0.8);
+        velocity.x += interaction.drag * (1.45 + depthInfluence * 1.15) * delta;
+        velocity.y += wave * Math.abs(interaction.drag) * 0.42 * delta;
+        velocity.z += Math.cos(index * 0.41) * Math.abs(interaction.drag) * 0.28 * delta;
+        if (velocity.length() > 1.25) velocity.setLength(1.25);
       }
       position[0] += velocity.x * delta;
       position[1] += velocity.y * delta;
@@ -692,17 +701,22 @@ function OrbGeometry({ type }) {
 function DriftGroup({ mobile, reducedMotion, interactionRef, children }) {
   const groupRef = useRef();
   const dragRef = useRef(0);
+  const dragVelocityRef = useRef(0);
   useFrame((state, delta) => {
     if (!groupRef.current || reducedMotion) return;
     const time = state.clock.elapsedTime;
     const interaction = interactionRef?.current;
     const targetDrag = interaction?.active ? interaction.drag : 0;
-    dragRef.current = THREE.MathUtils.damp(dragRef.current, targetDrag, interaction?.active ? 13 : 3.4, delta);
+    const step = Math.min(delta, 1 / 30);
+    const stiffness = interaction?.active ? 72 : 24;
+    const damping = interaction?.active ? 16 : 6.5;
+    dragVelocityRef.current += ((targetDrag - dragRef.current) * stiffness - dragVelocityRef.current * damping) * step;
+    dragRef.current += dragVelocityRef.current * step;
     const drag = dragRef.current;
-    groupRef.current.position.x = (mobile ? 0 : 2.1) + drag * (mobile ? 0.85 : 1.15);
-    groupRef.current.rotation.y = Math.sin(time * 0.045) * 0.05 + drag * 0.13;
+    groupRef.current.position.x = (mobile ? 0 : 2.1) + drag * (mobile ? 1.3 : 1.55);
+    groupRef.current.rotation.y = Math.sin(time * 0.045) * 0.05 + drag * 0.21;
     groupRef.current.rotation.x = Math.sin(time * 0.03) * 0.02;
-    groupRef.current.rotation.z = -drag * 0.055;
+    groupRef.current.rotation.z = -drag * 0.09;
   });
   return (
     <group ref={groupRef} position={[mobile ? 0 : 2.1, mobile ? 0.6 : 0, 0]}>
@@ -754,7 +768,7 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
       <BackWall progressRef={progressRef} mobile={mobile} />
       <AdaptiveSceneLight progressRef={progressRef} interactionRef={interactionRef} />
       <DriftGroup mobile={mobile} reducedMotion={reducedMotion} interactionRef={interactionRef}>
-        <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} />
+        <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} interactionRef={interactionRef} />
         <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} interactionRef={interactionRef} />
 
         {groups.map((group) => (
