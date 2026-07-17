@@ -131,7 +131,7 @@ function makeSurfaceTexture(type) {
   return texture;
 }
 
-function makeField(count, litRatio) {
+function makeField(count, litRatio, mobile) {
   const items = [];
   for (let i = 0; i < count; i += 1) {
     const spread = Math.pow(Math.random(), 0.5);
@@ -139,16 +139,19 @@ function makeField(count, litRatio) {
     const x = Math.cos(theta) * spread * 11.5;
     const y = Math.sin(theta) * spread * 6.4 + (Math.random() - 0.5) * 2.2;
     const z = -1.5 - Math.random() * 12;
-    const speed = 0.08 + Math.random() * 0.14;
+    const speed = (0.08 + Math.random() * 0.14) * (mobile ? 1.7 : 1);
+    const baseScale = 0.045 + Math.random() * 0.15;
+    const scalePosition = (baseScale - 0.045) / 0.15;
+    const scale = baseScale * THREE.MathUtils.lerp(1.68, 1.12, scalePosition);
     const velocity = new THREE.Vector3(
       Math.random() - 0.5,
       Math.random() - 0.5,
       Math.random() - 0.5,
     ).normalize().multiplyScalar(speed);
     const angularVelocity = [
-      (Math.random() - 0.5) * 0.16,
-      (Math.random() - 0.5) * 0.16,
-      (Math.random() - 0.5) * 0.16,
+      (Math.random() - 0.5) * 0.16 * (mobile ? 1.65 : 1),
+      (Math.random() - 0.5) * 0.16 * (mobile ? 1.65 : 1),
+      (Math.random() - 0.5) * 0.16 * (mobile ? 1.65 : 1),
     ];
     items.push({
       position: [x, y, z],
@@ -158,7 +161,7 @@ function makeField(count, litRatio) {
       rotation: [Math.random() * Math.PI, Math.random() * Math.PI, Math.random() * Math.PI],
       angularVelocity,
       baseAngularVelocity: [...angularVelocity],
-      scale: 0.045 + Math.random() * 0.15,
+      scale,
       lightable: false,
       powered: false,
       threshold: Math.random(),
@@ -202,7 +205,7 @@ function useOrbFieldData(mobile) {
     const groups = GROUP_DEFS.map((def) => {
       const count = groupCount(def, mobile);
       const ratio = groupLitRatio(def, mobile);
-      const items = makeField(count, ratio).map((item) => ({
+      const items = makeField(count, ratio, mobile).map((item) => ({
         ...item,
         // Keep an unpowered bulb genuinely dark. It can still become visible
         // when a neighboring real light lands on it, but it must never be

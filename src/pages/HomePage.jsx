@@ -15,14 +15,14 @@ export default function HomePage() {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const totalLights = useMemo(() => estimateOrbLightCount(mobile), [mobile]);
   const totalOrbs = useMemo(() => estimateOrbTotalCount(mobile), [mobile]);
-  const [lightsOn, setLightsOn] = useState(() => (mobile ? 2 : 1));
+  const [lightsOn, setLightsOn] = useState(() => (mobile ? 4 : 1));
   const [orbsOn, setOrbsOn] = useState(totalOrbs);
   const [orbsMoving, setOrbsMoving] = useState(true);
   const [stirSignal, setStirSignal] = useState({ id: 0, direction: 0, strength: 0 });
   const [pulseProgress, setPulseProgress] = useState(0);
   const wheelTotalRef = useRef(0);
   const lastLightStepRef = useRef(0);
-  const lastLightsRef = useRef(mobile ? 2 : 1);
+  const lastLightsRef = useRef(mobile ? 4 : 1);
   const ignitionLockRef = useRef(false);
   const ignitionTimerRef = useRef(null);
   const touchStartRef = useRef(null);
@@ -139,7 +139,7 @@ export default function HomePage() {
       const heroHeight = heroRef.current?.offsetHeight || window.innerHeight;
       const fraction = Math.max(0, Math.min(1, window.scrollY / heroHeight));
 
-      const nextLights = Math.max(2, Math.round(Math.min(1, fraction / 0.55) * totalLights));
+      const nextLights = Math.max(4, Math.round(Math.min(1, fraction / 0.55) * totalLights));
       if (nextLights !== lastLightsRef.current) {
         lastLightsRef.current = nextLights;
         setLightsOn(nextLights);
