@@ -1,6 +1,7 @@
 import "./App.css";
 import { Navigate, Route, Routes } from "react-router-dom";
 import Nav from "./components/Nav";
+import PageTracker from "./components/PageTracker";
 import HomePage from "./pages/HomePage";
 import StoryPage from "./pages/StoryPage";
 import ProjectsPage from "./pages/ProjectsPage";
@@ -8,6 +9,7 @@ import ProjectsPage from "./pages/ProjectsPage";
 export default function App() {
   return (
     <div className="site-shell">
+      <PageTracker />
       <Nav />
       <Routes>
         <Route path="/" element={<HomePage />} />
