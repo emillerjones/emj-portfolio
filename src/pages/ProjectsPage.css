@@ -88,6 +88,8 @@
 .projects-page__supporting ul { display:flex; flex-wrap:wrap; gap:6px; }
 .projects-page__supporting li { color:var(--text-3); font-size:8px; }
 .projects-page__supporting li+li::before { margin-right:6px; content:"/"; }
+.projects-page__supporting nav { margin-top:22px; }
+.projects-page__supporting nav a { color:var(--accent); font-size:10px; font-weight:750; }
 
 .projects-page__footer { display:flex; align-items:center; justify-content:space-between; gap:30px; margin-top:90px; padding:50px 0 10px; border-top:1px solid var(--border-md); }
 .projects-page__footer p { color:var(--text-3); font-size:10px; letter-spacing:.14em; text-transform:uppercase; }

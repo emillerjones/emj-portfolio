@@ -15,6 +15,7 @@ const MAJOR_PROJECTS = [
     artifact: "horizon",
     links: [
       { label: "Visit Horizon", href: "https://raidhelper-client.vercel.app/" },
+      { label: "Install calendar extension", href: "https://chromewebstore.google.com/detail/horizon-raid-calendar/hpmdebjcifgnopndpbmeocgkllhklahd" },
       { label: "View code", href: "https://github.com/emillerjones/raidhelper-client" },
     ],
   },
@@ -56,6 +57,9 @@ const SUPPORTING_PROJECTS = [
     type: "AI-assisted R&D",
     result: "Procedural 3D environments, physics studies, particles, and rendering experiments used to develop stronger browser art direction.",
     tags: ["Three.js", "WebGPU", "Rapier", "React Three Fiber"],
+    links: [
+      { label: "Open Animation Lab", href: "https://animation-lab-eight.vercel.app/" },
+    ],
   },
   {
     number: "05",
@@ -63,6 +67,9 @@ const SUPPORTING_PROJECTS = [
     type: "Published Chrome extensions",
     result: "Small utilities for per-site volume memory and faster Discord raid-scheduling workflows.",
     tags: ["JavaScript", "Chrome APIs", "UX"],
+    links: [
+      { label: "View Volume Per Site", href: "https://chromewebstore.google.com/detail/volume-per-site/bjemkhlmiagaegjmmnjbgehammfaiamp" },
+    ],
   },
   {
     number: "06",
@@ -70,6 +77,7 @@ const SUPPORTING_PROJECTS = [
     type: "Fullstack Academy capstone",
     result: "A four-person full-stack matchmaking and session-management product that helped establish the ideas later developed in Horizon.",
     tags: ["React", "Node.js", "PostgreSQL", "Team Development"],
+    links: [],
   },
 ];
 
@@ -193,6 +201,15 @@ export default function ProjectsPage() {
               <h3>{project.name}</h3>
               <div>{project.result}</div>
               <ul>{project.tags.map((tag) => <li key={tag}>{tag}</li>)}</ul>
+              {project.links.length > 0 && (
+                <nav aria-label={`${project.name} links`}>
+                  {project.links.map((link) => (
+                    <a key={link.href} href={link.href} target="_blank" rel="noreferrer">
+                      {link.label} <span>↗</span>
+                    </a>
+                  ))}
+                </nav>
+              )}
             </article>
           ))}
         </div>
