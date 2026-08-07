@@ -51,12 +51,12 @@ export default function About() {
 
         <div className="about-cta-row">
           <a href="/resume.pdf" download className="btn btn--primary">Download Resume &darr;</a>
-          <a href="mailto:emj.studioworks@gmail.com" className="btn btn--ghost">Let's talk &rarr;</a>
+          <a href="mailto:evan.millerjones@gmail.com" className="btn btn--ghost">Let's talk &rarr;</a>
         </div>
 
         <div className="about-contact">
           <div className="footer-links">
-            <a href="mailto:emj.studioworks@gmail.com">emj.studioworks@gmail.com</a>
+            <a href="mailto:evan.millerjones@gmail.com">evan.millerjones@gmail.com</a>
             <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
             <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
             <p className="footer-copy">&copy; 2026 EMJ &middot; Texas, USA</p>

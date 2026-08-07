@@ -76,7 +76,7 @@ function HeroSocial() {
       <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer" aria-label="LinkedIn">
         <LinkedinIcon />
       </a>
-      <a href="mailto:emj.studioworks@gmail.com" aria-label="Email">
+      <a href="mailto:evan.millerjones@gmail.com" aria-label="Email">
         <EmailIcon />
       </a>
     </div>
