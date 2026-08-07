@@ -484,7 +484,7 @@ export default function HomePage() {
             <a href="/resume.pdf" download>Résumé</a>
           </div>
           <div className="landing-reveal__social">
-            <a href="mailto:emj.studioworks@gmail.com">Email</a>
+            <a href="mailto:evan.millerjones@gmail.com">Email</a>
             <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
             <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
           </div>
@@ -494,7 +494,7 @@ export default function HomePage() {
       <footer className="landing-page__footer">
         <span>Available for full-stack opportunities</span>
         <nav aria-label="Social links">
-          <a href="mailto:emj.studioworks@gmail.com">Email</a>
+          <a href="mailto:evan.millerjones@gmail.com">Email</a>
           <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
           <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
         </nav>
