@@ -35,7 +35,7 @@ const CHAPTERS = [
     org: "Fullstack Academy · Independent product work",
     body: [
       "When the AppointmentWave engagement ended, I enrolled in Fullstack Academy's software-engineering program. I expected stronger fundamentals might make AI less necessary. The program strengthened my understanding of JavaScript and full-stack systems. Afterward, I began working with Codex, which expanded the scale and complexity of work I could take on. AI did not recede; I became better equipped to use it.",
-      "Since boot camp, I have built Horizon, Wellness Recovery Community, this portfolio, Animation Lab, and focused browser extensions. Horizon is a deployed React, Express, PostgreSQL, and Discord product used by 30+ guilds to organize more than 500 raids. Recovery Community is a full-stack nonprofit platform with authenticated forums, messaging, moderation, notifications, and a community lounge.",
+      "Since boot camp, I have built Recovery Community, Horizon, this portfolio, Animation Lab, and focused browser extensions. Recovery Community is a stakeholder-led, full-stack platform with membership admissions, authenticated forums, messaging, moderation, notifications, and a real-time community Lounge. Horizon is a deployed React, Express, PostgreSQL, and Discord product used by 30+ guilds to organize more than 500 raids.",
       "Today I work as an AI-augmented developer. AI accelerates implementation and gives me more room to focus on architecture, product behavior, usability, and creative decisions. I remain responsible for understanding the system, inspecting the implementation, testing the behavior, explaining the decisions, and what ultimately ships—while continuing to strengthen my independent skills.",
     ],
     quote: "I build with leverage. I remain accountable for the result.",
@@ -126,7 +126,7 @@ export default function StoryPage2() {
           <span>Profile</span>
           <dl>
             <div><dt>Based in</dt><dd>Austin, Texas</dd></div>
-            <div><dt>Focus</dt><dd>Full-stack products</dd></div>
+            <div><dt>Focus</dt><dd>Solutions and systems</dd></div>
             <div><dt>Approach</dt><dd>Practical, human, shipped</dd></div>
           </dl>
         </aside>

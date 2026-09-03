@@ -10,7 +10,7 @@ const OrbField = lazy(() => import("../components/OrbField"));
 const MOBILE_INTRO = {
   initialDelayMs: 320,
   lightIntervalMs: 225,
-  interfaceRevealLight: 7,
+  interfaceRevealLight: 5,
   interfaceStageGapMs: 800,
   interfaceFadeMs: 1900,
 };
@@ -34,9 +34,9 @@ function rememberMobileIntro() {
 }
 
 const FEATURED_PROJECTS = [
-  { tag: "Live product", name: "Horizon", result: "A full-stack raid calendar now tracking 28 guilds and 500+ raids." },
-  { tag: "In development", name: "Wellness Recovery Community", result: "A public foundation for a nonprofit recovery community, built for trust and accessibility." },
-  { tag: "TCEQ · 2016–2023", name: "Enterprise Records Workflow System", result: "A daily workflow product supporting 30–50 records staff." },
+  { tag: "Preparing for private beta", name: "Recovery Community", result: "An owned, full-stack platform designed with an established community owner around trust, privacy, and connection." },
+  { tag: "TCEQ · 2013–2023", name: "Records Operations Platform", result: "An enterprise workflow system used daily by 30–50 records staff." },
+  { tag: "Live product", name: "Horizon", result: "A full-stack raid calendar now tracking 30+ guilds and 500+ raids." },
 ];
 
 export default function HomePage() {
@@ -379,7 +379,7 @@ export default function HomePage() {
           <div className="landing-page__mobile-identity">
             <span className="landing-page__mobile-kicker">Portfolio / 2026</span>
             <strong>Evan Miller-Jones</strong>
-            <span className="landing-page__mobile-role">Product Builder &amp; Full-Stack Developer</span>
+            <span className="landing-page__mobile-role">Solutions &amp; Systems Engineer</span>
           </div>
 
           <section
@@ -387,7 +387,7 @@ export default function HomePage() {
             aria-labelledby="landing-title"
             ref={contentRef}
           >
-            <p className="landing-page__eyebrow">Full-Stack Developer &amp; Product Builder · Texas</p>
+            <p className="landing-page__eyebrow">Solutions &amp; Systems Engineer · Texas</p>
             <h1 id="landing-title">Software should fit the way people actually work.</h1>
             <p className="landing-page__intro">
               I study real workflows, find where people lose time or context, then design software that makes the work simpler.
@@ -457,8 +457,8 @@ export default function HomePage() {
           <span className="landing-reveal__eyebrow">About</span>
           <p>
             I&rsquo;ve spent over a decade turning messy, manual processes&mdash;paper records, spreadsheets, scattered Discord
-            threads&mdash;into software people actually rely on. These days that&rsquo;s full-stack product work: React and Node
-            on the front end and API layer, PostgreSQL underneath, shipped and improved from real use.
+            threads&mdash;into software people actually rely on. Today I translate stakeholder workflows into system designs,
+            data models, integrations, automation, and working full-stack products.
           </p>
           <Link to="/mystory">Read the full story <span>→</span></Link>
         </div>
@@ -492,7 +492,7 @@ export default function HomePage() {
       </section>
 
       <footer className="landing-page__footer">
-        <span>Available for full-stack opportunities</span>
+        <span>Available for solutions and systems engineering opportunities</span>
         <nav aria-label="Social links">
           <a href="mailto:evan.millerjones@gmail.com">Email</a>
           <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
