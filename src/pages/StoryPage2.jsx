@@ -5,7 +5,7 @@ import "./StoryPage2.css";
 const CHAPTERS = [
   {
     number: "Chapter Three",
-    period: "2016 — 2023",
+    period: "2017 — 2023",
     title: "I got the title for the work I was already doing.",
     org: "TCEQ · Technical Analyst",
     body: [
@@ -142,7 +142,7 @@ export default function StoryPage2() {
               <div>
                 <div className="story2-chapter__head">
                   <span className="story2-chapter__index">Chapter One</span>
-                  <span className="story2-chapter__period">2013 — 2016</span>
+                  <span className="story2-chapter__period">2013 — 2015</span>
                 </div>
                 <h2>I learned the work from both sides.</h2>
                 <p className="story2-chapter__org">TCEQ · Records &amp; Document Imaging</p>
