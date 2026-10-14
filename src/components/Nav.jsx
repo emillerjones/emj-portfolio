@@ -5,7 +5,9 @@ import "./Nav.css";
 const LINKS = [
   { label: "Home", to: "/" },
   { label: "My Story", to: "/mystory" },
+  { label: "Story B", to: "/mystory-b" },
   { label: "Projects", to: "/projects" },
+  { label: "Projects B", to: "/projects-b" },
 ];
 
 export default function Nav() {
