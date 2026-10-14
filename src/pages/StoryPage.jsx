@@ -1,6 +1,7 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
-import "./StoryPage2.css";
+import "./StoryPage.css";
+
 
 const CHAPTERS = [
   {
@@ -10,9 +11,12 @@ const CHAPTERS = [
     org: "TCEQ · Technical Analyst",
     body: [
       "After the migration, I laid out the responsibilities I had taken on and compared them with the Technical Analyst job description. The company agreed that my role should match the work and promoted me. It was a promotion I had helped make happen by doing the work first, documenting the evidence, and advocating for the recognition I had earned.",
-      "Technical improvement became my formal, full-time focus for the next six years. I supported WebCenter Content and improved the operation one area at a time, building Access, VBA, SQL, and Oracle-connected tools that replaced vendor software and workflows, validated imports, routed work, tracked productivity, and became the main daily system for 30–50 staff across imaging, redaction, public information, and records management.",
+      "Technical improvement became my formal, full-time focus. Different departments had their own workflows and software. I brought those together in one centralized Access/VBA application connected to Oracle tables through ODBC. Imaging, public information, quality control, redaction, and records management could work through a shared system instead of disconnected tools. It became the main daily application for 30–50 staff.",
+      "I was PacoTech's sole technical staff member assigned to this work, collaborating with agency IT, the implementation vendor, and the people using the software. I built automated imports to replace purchased scanning software, validation checks to catch incomplete processing, and work queues, dashboards, and reports to help staff and supervisors manage the operation.",
+      "A few years later, a separate Document Review and Redaction contract needed a subset of those workflows for two departments. I used the relevant parts of my original application as the foundation and built a separate, improved version tailored to the new contract. It tracked reviews, findings, errors, and staff productivity alongside WCC's redaction process. This was a new application for a separate operation, built from a system I already knew deeply.",
     ],
-    quote: "One area at a time, I built a better version of what we had been given.",
+    quote: "The goal was one connected system for the people doing the work.",
+    links: [{ label: "Employer case study: Document Review & Redaction", href: "https://www.pacotech.com/tceq-document-review-redaction/" }],
     note: { label: "Daily reach", before: "Built for ", strong: "30–50 staff", after: " across the records operation." },
   },
   {
@@ -83,8 +87,8 @@ function useSpineFill(sectionRef, fillRef) {
 
 function Note({ note }) {
   return (
-    <div className="story2-note">
-      <span className="story2-note__label">{note.label}</span>
+    <div className="story-note">
+      <span className="story-note__label">{note.label}</span>
       <p>{note.before}<b>{note.strong}</b>{note.after}</p>
     </div>
   );
@@ -92,16 +96,16 @@ function Note({ note }) {
 
 function ChapterLink({ link }) {
   if (link.to) {
-    return <Link className="story2-chapter__link" to={link.to}>{link.label} <span>→</span></Link>;
+    return <Link className="story-chapter__link" to={link.to}>{link.label} <span>→</span></Link>;
   }
   return (
-    <a className="story2-chapter__link" href={link.href} target="_blank" rel="noreferrer">
+    <a className="story-chapter__link" href={link.href} target="_blank" rel="noreferrer">
       {link.label} <span>↗</span>
     </a>
   );
 }
 
-export default function StoryPage2() {
+export default function StoryPage() {
   const ledgerTopRef = useRef(null);
   const spineTopFillRef = useRef(null);
   const ledgerBottomRef = useRef(null);
@@ -111,10 +115,10 @@ export default function StoryPage2() {
   useSpineFill(ledgerBottomRef, spineBottomFillRef);
 
   return (
-    <main className="story2">
-      <header className="story2-hero">
-        <div className="story2-hero__intro">
-          <span className="story2-hero__eyebrow">Working history · 2013—present</span>
+    <main className="story">
+      <header className="story-hero">
+        <div className="story-hero__intro">
+          <span className="story-hero__eyebrow">Working history · 2013—present</span>
           <h1>I learned software <em>from the work</em> outward.</h1>
           <p>
             I didn&apos;t begin with a framework. I began by watching people lose time to systems that
@@ -122,7 +126,7 @@ export default function StoryPage2() {
             close that gap.
           </p>
         </div>
-        <aside className="story2-hero__card" aria-label="Profile summary">
+        <aside className="story-hero__card" aria-label="Profile summary">
           <span>Profile</span>
           <dl>
             <div><dt>Based in</dt><dd>Austin, Texas</dd></div>
@@ -132,20 +136,20 @@ export default function StoryPage2() {
         </aside>
       </header>
 
-      <div className="story2-ledger" ref={ledgerTopRef}>
-        <div className="story2-spine" aria-hidden="true">
-          <div className="story2-spine__fill" ref={spineTopFillRef} />
+      <div className="story-ledger" ref={ledgerTopRef}>
+        <div className="story-spine" aria-hidden="true">
+          <div className="story-spine__fill" ref={spineTopFillRef} />
         </div>
-        <div className="story2-ledger__content">
-          <article className="story2-chapter">
-            <div className="story2-chapter__row">
+        <div className="story-ledger__content">
+          <article className="story-chapter">
+            <div className="story-chapter__row">
               <div>
-                <div className="story2-chapter__head">
-                  <span className="story2-chapter__index">Chapter One</span>
-                  <span className="story2-chapter__period">2013 — 2015</span>
+                <div className="story-chapter__head">
+                  <span className="story-chapter__index">Chapter One</span>
+                  <span className="story-chapter__period">2013 — 2015</span>
                 </div>
                 <h2>I learned the work from both sides.</h2>
-                <p className="story2-chapter__org">TCEQ · Records &amp; Document Imaging</p>
+                <p className="story-chapter__org">TCEQ · Records &amp; Document Imaging</p>
                 <p>
                   I joined TCEQ&apos;s records operation as a clerk in 2013, working with paper files,
                   scanned documents, public-information requests, and the software that kept
@@ -160,19 +164,19 @@ export default function StoryPage2() {
                   everyone using it.
                 </p>
               </div>
-              <div className="story2-ladder" aria-label="Title history, 2013 to 2016">
-                <span className="story2-ladder__label">Title, 2013–2016</span>
-                <div className="story2-ladder__item">
-                  <span className="story2-ladder__year">&apos;13</span>
-                  <span className="story2-ladder__title">Clerk</span>
+              <div className="story-ladder" aria-label="Title history, 2013 to 2016">
+                <span className="story-ladder__label">Title, 2013–2016</span>
+                <div className="story-ladder__item">
+                  <span className="story-ladder__year">&apos;13</span>
+                  <span className="story-ladder__title">Clerk</span>
                 </div>
-                <div className="story2-ladder__item">
-                  <span className="story2-ladder__year">&nbsp;</span>
-                  <span className="story2-ladder__title">Team Lead</span>
+                <div className="story-ladder__item">
+                  <span className="story-ladder__year">&nbsp;</span>
+                  <span className="story-ladder__title">Team Lead</span>
                 </div>
-                <div className="story2-ladder__item story2-ladder__item--current">
-                  <span className="story2-ladder__year">&nbsp;</span>
-                  <span className="story2-ladder__title">Assistant Supervisor</span>
+                <div className="story-ladder__item story-ladder__item--current">
+                  <span className="story-ladder__year">&nbsp;</span>
+                  <span className="story-ladder__title">Assistant Supervisor</span>
                 </div>
               </div>
             </div>
@@ -180,11 +184,11 @@ export default function StoryPage2() {
         </div>
       </div>
 
-      <section className="story2-interstitial">
-        <div className="story2-interstitial__inner">
-          <span className="story2-interstitial__eyebrow">Chapter Two · Records Analyst · 2016</span>
+      <section className="story-interstitial">
+        <div className="story-interstitial__inner">
+          <span className="story-interstitial__eyebrow">Chapter Two · Records Analyst · 2016</span>
           <h2>I chose the system over management.</h2>
-          <p className="story2-interstitial__sub">
+          <p className="story-interstitial__sub">
             Moving into the Records Analyst role was both a promotion and a deliberate technical
             pivot. It gave me room to move from ideas to implementation—working directly with
             Access, SQL, queries, and the tables behind our screens. The role lasted roughly a year
@@ -192,59 +196,63 @@ export default function StoryPage2() {
             to Oracle WebCenter Content.
           </p>
 
-          <div className="story2-system-map" aria-label="TCEQ, the vendor, and the contractor team working around WebCenter Content">
+          <div className="story-system-map" aria-label="TCEQ, the vendor, and the contractor team working around WebCenter Content">
             <svg viewBox="0 0 520 270" fill="none" aria-hidden="true">
               <line x1="260" y1="51" x2="260" y2="102" />
               <line x1="100" y1="218" x2="218" y2="160" />
               <line x1="420" y1="218" x2="302" y2="160" />
             </svg>
-            <div className="story2-system-map__node story2-system-map__node--agency"><b>TCEQ</b><span>Owner</span></div>
-            <div className="story2-system-map__node story2-system-map__node--contractor"><b>Contractor team</b><span>Daily operation</span></div>
-            <div className="story2-system-map__node story2-system-map__node--vendor"><b>Vendor</b><span>Build and customization</span></div>
-            <div className="story2-system-map__product"><span>Shared product</span><b>WebCenter<br />Content</b></div>
+            <div className="story-system-map__node story-system-map__node--agency"><b>TCEQ</b><span>Owner</span></div>
+            <div className="story-system-map__node story-system-map__node--contractor"><b>Contractor team</b><span>Daily operation</span></div>
+            <div className="story-system-map__node story-system-map__node--vendor"><b>Vendor</b><span>Build and customization</span></div>
+            <div className="story-system-map__product"><span>Shared product</span><b>WebCenter<br />Content</b></div>
           </div>
 
-          <p className="story2-interstitial__body">
+          <p className="story-interstitial__body">
             By then, I was our subject-matter expert on InSight. I understood how records were
             defined, where the data lived, how parent-child classifications worked, and how actions
             on screen changed the tables underneath. For the migration, I learned WebCenter
             Content&apos;s very different structure, developed the primary data map, built a staging
             environment that mirrored its tables, and wrote the queries that transformed our
-            existing data for the vendor&apos;s final transfer.
+            existing data for the vendor&apos;s final transfer. The overall migration covered
+            3,079,205 inventory items.
           </p>
-          <p className="story2-interstitial__body">
+          <p className="story-interstitial__body">
             I also translated between the agency, the vendor, and the people doing the daily work.
             I designed test plans, coordinated staff testing, and used database queries to verify
             the results. After close to a year, we turned the key: InSight went away and WebCenter
             Content took its place.
           </p>
 
-          <p className="story2-interstitial__climax">
+          <p className="story-interstitial__body">
+            <a href="https://www.pacotech.com/tceq-data-migration-to-oracle-webcenter-content/" target="_blank" rel="noreferrer">Read PacoTech&apos;s migration case study ↗</a>
+          </p>
+          <p className="story-interstitial__climax">
             I had spent the year doing technical work. Next, I made the case that my role should
             finally reflect it.
           </p>
         </div>
       </section>
 
-      <div className="story2-ledger" ref={ledgerBottomRef}>
-        <div className="story2-spine" aria-hidden="true">
-          <div className="story2-spine__fill" ref={spineBottomFillRef} />
+      <div className="story-ledger" ref={ledgerBottomRef}>
+        <div className="story-spine" aria-hidden="true">
+          <div className="story-spine__fill" ref={spineBottomFillRef} />
         </div>
-        <div className="story2-ledger__content">
+        <div className="story-ledger__content">
           {CHAPTERS.map((chapter) => (
-            <article className="story2-chapter" key={chapter.number}>
-              <div className="story2-chapter__row">
+            <article className="story-chapter" key={chapter.number}>
+              <div className="story-chapter__row">
                 <div>
-                  <div className="story2-chapter__head">
-                    <span className="story2-chapter__index">{chapter.number}</span>
-                    <span className="story2-chapter__period">{chapter.period}</span>
+                  <div className="story-chapter__head">
+                    <span className="story-chapter__index">{chapter.number}</span>
+                    <span className="story-chapter__period">{chapter.period}</span>
                   </div>
                   <h2>{chapter.title}</h2>
-                  <p className="story2-chapter__org">{chapter.org}</p>
+                  <p className="story-chapter__org">{chapter.org}</p>
                   {chapter.body.map((paragraph) => <p key={paragraph}>{paragraph}</p>)}
                   <blockquote>{chapter.quote}</blockquote>
                   {chapter.links && (
-                    <nav className="story2-chapter__links" aria-label={`${chapter.number} related links`}>
+                    <nav className="story-chapter__links" aria-label={`${chapter.number} related links`}>
                       {chapter.links.map((link) => <ChapterLink link={link} key={link.label} />)}
                     </nav>
                   )}
@@ -256,9 +264,9 @@ export default function StoryPage2() {
         </div>
       </div>
 
-      <footer className="story2-closing">
+      <footer className="story-closing">
         <div>
-          <span className="story2-closing__eyebrow">What I&apos;m looking for</span>
+          <span className="story-closing__eyebrow">What I&apos;m looking for</span>
           <h2>Work worth understanding before it&apos;s built.</h2>
           <p>
             A team where I can keep growing while bringing the judgment I&apos;ve earned from years

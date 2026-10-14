@@ -131,3 +131,5 @@
   .projects-page__supporting article>div { min-height:auto; }
   .projects-page__footer { align-items:flex-start; flex-direction:column; margin-top:60px; }
 }
+
+.major-project--records .major-project__case { grid-column: 1 / -1; }

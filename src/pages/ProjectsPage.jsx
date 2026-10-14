@@ -1,6 +1,7 @@
 import { Link } from "react-router-dom";
 import "./ProjectsPage.css";
 
+
 const MAJOR_PROJECTS = [
   {
     number: "01",
@@ -23,13 +24,18 @@ const MAJOR_PROJECTS = [
     name: "Records Operations Platform",
     type: "Internal operational product",
     status: "TCEQ · 2016—2023",
-    role: "Technical Analyst and workflow developer",
-    problem: "Document imaging, redaction, public-information, and records teams depended on manual steps and vendor tools that did not support the full operation.",
-    built: "Access, VBA, SQL, and Oracle-connected applications layered around WebCenter Content to validate imports, route work, track productivity, and give staff a dependable operational view.",
-    outcome: "Replaced vendor workflows and became the main daily system for 30–50 staff across multiple records functions.",
+    role: "PacoTech’s sole technical staff member assigned to these systems, collaborating with TCEQ IT and the implementation vendor",
+    problem: "Departments had their own software and workflows for imaging, public information, quality control, redaction, and records management. The operation needed those processes to work together, while preserving the requirements of each department.",
+    built: "One centralized Access/VBA application connected to Oracle through ODBC, bringing departmental workflows into a shared system. I built automated imports, validation checks, work queues, dashboards, and reporting, replacing purchased scanning software and connecting the work across departments.",
+    migration: "For the InSight-to-Oracle WebCenter Content migration, I developed the primary data map, mirrored destination tables in a staging environment, and wrote transformation queries to prepare data for the vendor’s final transfer. I designed test plans, coordinated staff testing, and verified results with database queries. The overall project covered 3,079,205 inventory items.",
+    drr: "A later, separate Document Review and Redaction contract needed workflows for two departments. I reused the relevant parts of my original application and built a separate, improved version tailored to the new operation, tracking reviews, findings, errors, and staff productivity alongside WCC’s redaction module.",
+    outcome: "The centralized platform became the main daily application for 30–50 staff across the records operation. Its design later provided the foundation for a separate application serving the DRR contract.",
     tags: ["Microsoft Access", "VBA", "SQL", "Oracle", "ODBC", "Workflow Design"],
     artifact: "records",
-    links: [],
+    links: [
+      { label: "Employer case study: Migration", href: "https://www.pacotech.com/tceq-data-migration-to-oracle-webcenter-content/" },
+      { label: "Employer case study: DRR", href: "https://www.pacotech.com/tceq-document-review-redaction/" },
+    ],
   },
   {
     number: "03",
@@ -135,7 +141,7 @@ function ProjectArtifact({ type }) {
 
 function MajorProject({ project }) {
   return (
-    <article className="major-project">
+    <article className={`major-project${project.artifact === "records" ? " major-project--records" : ""}`}>
       <header className="major-project__rail">
         <span>{project.number}</span>
         <div><p>{project.type}</p><small>{project.status}</small></div>
@@ -152,6 +158,8 @@ function MajorProject({ project }) {
         <div className="major-project__case">
           <div><span>Problem</span><p>{project.problem}</p></div>
           <div><span>What I built</span><p>{project.built}</p></div>
+          {project.migration && <div><span>Enterprise migration</span><p>{project.migration}</p></div>}
+          {project.drr && <div><span>Separate DRR application</span><p>{project.drr}</p></div>}
           <div className="major-project__outcome"><span>Outcome</span><p>{project.outcome}</p></div>
         </div>
 
