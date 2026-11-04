@@ -1,9 +1,68 @@
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { EffectComposer, Bloom } from "@react-three/postprocessing";
 import * as THREE from "three";
 import { GROUP_DEFS, MAX_REAL_LIGHTS, groupCount, groupLitRatio } from "./orbFieldConfig";
+import { areaToBox, buildFlowPath, formationTarget, prepareFormations } from "./orbFormations";
 import "./OrbField.css";
+
+// Warm firelight that lit orbs blend toward during the "gathering" stop.
+const WARM_LIGHT = new THREE.Color("#ff9a3c");
+const WARM_STAR = new THREE.Color("#ffb766").multiplyScalar(2.15);
+const formationScratch = new THREE.Vector3();
+
+// Moves one orb while a formation is active (or while it springs back
+// home afterwards). Returns false when the orb should simply drift as
+// usual. Members spring to their slot; everyone else recedes into the
+// background so the formation reads clearly.
+function stepFormationItem(item, formation, time, delta) {
+  const stop = time - formation.switchedAt > item.delay ? formation.stop : formation.prevStop;
+  const member = item.member >= 0;
+  item.formBlend = THREE.MathUtils.damp(item.formBlend, member && stop > 0 ? 1 : 0, 4, delta);
+  item.renderScale = THREE.MathUtils.lerp(item.scale, item.formScale ?? item.scale, item.formBlend);
+  if (stop === 0 && !item.springing) return false;
+
+  const home = item.homePosition;
+  const target = formationScratch;
+  let stiffness;
+  let damping;
+  if (stop > 0 && member) {
+    formationTarget(item, stop, time, formation.box, formation.flowPath, target);
+    stiffness = 7.5;
+    damping = 4.8;
+  } else if (stop > 0) {
+    target.set(
+      home[0] + Math.sin(time * 0.2 + item.seed) * 0.4,
+      home[1] + Math.cos(time * 0.17 + item.seed) * 0.3,
+      home[2] - 5,
+    );
+    stiffness = 2;
+    damping = 2.6;
+  } else {
+    target.set(home[0], home[1], home[2]);
+    stiffness = 3.2;
+    damping = 3.2;
+  }
+
+  item.springing = true;
+  const position = item.position;
+  const velocity = item.spring;
+  velocity.x += (stiffness * (target.x - position[0]) - damping * velocity.x) * delta;
+  velocity.y += (stiffness * (target.y - position[1]) - damping * velocity.y) * delta;
+  velocity.z += (stiffness * (target.z - position[2]) - damping * velocity.z) * delta;
+  position[0] += velocity.x * delta;
+  position[1] += velocity.y * delta;
+  position[2] += velocity.z * delta;
+  item.rotation[0] += item.angularVelocity[0] * delta;
+  item.rotation[1] += item.angularVelocity[1] * delta;
+  item.rotation[2] += item.angularVelocity[2] * delta;
+
+  if (stop === 0) {
+    const distance = Math.hypot(target.x - position[0], target.y - position[1], target.z - position[2]);
+    if (distance < 0.08 && velocity.length() < 0.15) item.springing = false;
+  }
+  return true;
+}
 
 // Scatters an orb's own color around its group's nominal tone -- baked
 // once per instance at build time, never touched again, so it's real
@@ -362,7 +421,7 @@ function AssemblingInstances({ items, geometry, material, revealRef, reducedMoti
       amounts[index] = next;
       dummy.position.set(...item.position);
       dummy.rotation.set(...item.rotation);
-      dummy.scale.setScalar(item.scale * next);
+      dummy.scale.setScalar((item.renderScale ?? item.scale) * next);
       dummy.updateMatrix();
       mesh.setMatrixAt(index, dummy.matrix);
       dirty = true;
@@ -385,7 +444,7 @@ function AssemblingInstances({ items, geometry, material, revealRef, reducedMoti
 // read as "on" (its surface is simply close to a bright real light),
 // and its falloff is what lights up whatever orbs happen to be nearby --
 // the solar-system effect, not a fake glow shader.
-function LightBulbs({ items, reducedMotion, progressRef, interactionRef, limit }) {
+function LightBulbs({ items, reducedMotion, progressRef, interactionRef, formationState, limit }) {
   const lightRefs = useRef([]);
   const intensitiesRef = useRef(null);
   if (intensitiesRef.current === null) {
@@ -409,6 +468,8 @@ function LightBulbs({ items, reducedMotion, progressRef, interactionRef, limit }
       if (item) {
         light.position.set(...item.position);
         light.color.set(item.color);
+        const warm = formationState?.warm ?? 0;
+        if (warm > 0.001) light.color.lerp(WARM_LIGHT, warm);
         light.distance = item.reach * 1.75;
         light.intensity = next * item.power * 2.35 * (1 + flash * 0.38);
       } else {
@@ -435,7 +496,7 @@ function LightBulbs({ items, reducedMotion, progressRef, interactionRef, limit }
 // A visible emissive skin for every lightable orb. Real point lights are
 // deliberately capped below, but every activated orb still becomes a bright
 // little bulb in its own right and feeds the bloom pass.
-function BulbCores({ items, progress }) {
+function BulbCores({ items, progress, formationState }) {
   const activeCount = Math.round(progress * items.length);
 
   return (
@@ -444,12 +505,27 @@ function BulbCores({ items, progress }) {
         <MovingAnchor key={item.key} item={item} renderOrder={100}>
           <mesh scale={item.scale * 1.24} renderOrder={100}>
             <sphereGeometry args={[1, 18, 18]} />
-            <meshBasicMaterial color={item.starColor} toneMapped={false} depthTest={false} depthWrite={false} />
+            <WarmableBasicMaterial base={item.starColor} warmColor={WARM_STAR} formationState={formationState} toneMapped={false} depthTest={false} depthWrite={false} />
           </mesh>
         </MovingAnchor>
       ))}
     </group>
   );
+}
+
+// A basic material whose color blends toward firelight while the
+// gathering formation is active. Without a formation it is static.
+function WarmableBasicMaterial({ base, warmColor, formationState, sprite = false, ...props }) {
+  const materialRef = useRef();
+  const baseColor = useMemo(() => new THREE.Color(base), [base]);
+  useFrame(() => {
+    const warm = formationState?.warm ?? 0;
+    if (!materialRef.current || !formationState) return;
+    materialRef.current.color.copy(baseColor).lerp(warmColor, warm);
+  });
+  return sprite
+    ? <spriteMaterial ref={materialRef} color={base} {...props} />
+    : <meshBasicMaterial ref={materialRef} color={base} {...props} />;
 }
 
 function makeStarTexture() {
@@ -470,7 +546,7 @@ function makeStarTexture() {
   return texture;
 }
 
-function BulbHalos({ items, progress }) {
+function BulbHalos({ items, progress, formationState }) {
   const texture = useMemo(() => makeStarTexture(), []);
   const activeCount = Math.round(progress * items.length);
 
@@ -479,7 +555,7 @@ function BulbHalos({ items, progress }) {
       {items.slice(0, activeCount).map((item) => (
         <MovingAnchor key={item.key} item={item} renderOrder={101}>
           <sprite scale={[item.scale * 4.2, item.scale * 4.2, 1]} renderOrder={101}>
-            <spriteMaterial map={texture} color={item.color} toneMapped={false} transparent opacity={0.44} blending={THREE.AdditiveBlending} depthTest={false} depthWrite={false} />
+            <WarmableBasicMaterial sprite base={item.color} warmColor={WARM_LIGHT} formationState={formationState} map={texture} toneMapped={false} transparent opacity={0.44} blending={THREE.AdditiveBlending} depthTest={false} depthWrite={false} />
           </sprite>
         </MovingAnchor>
       ))}
@@ -495,7 +571,7 @@ function MovingAnchor({ item, renderOrder, children }) {
   return <group ref={ref} position={item.position} renderOrder={renderOrder}>{children}</group>;
 }
 
-function MotionController({ groups, enabled, stirSignal, interactionRef }) {
+function MotionController({ groups, enabled, stirSignal, interactionRef, formationState }) {
   const items = useMemo(() => groups.flatMap((group) => group.items), [groups]);
 
   useEffect(() => {
@@ -518,8 +594,14 @@ function MotionController({ groups, enabled, stirSignal, interactionRef }) {
     const delta = Math.min(frameDelta, 1 / 30);
     const cells = new Map();
     const cellSize = 0.42;
+    const formation = formationState;
+    const time = state.clock.elapsedTime;
+    formation?.tick(time, delta);
 
     items.forEach((item, index) => {
+      // Orbs in (or returning from) a formation skip the drift and the
+      // collision pass; the formation layouts are already spaced.
+      if (formation && stepFormationItem(item, formation, time, delta)) return;
       const position = item.position;
       const velocity = item.velocity;
       const relaxedSpeed = THREE.MathUtils.damp(velocity.length(), item.baseSpeed, 0.55, delta);
@@ -748,8 +830,61 @@ function useRevealDriver({ orbProgressRef, reducedMotion, onAssembled }) {
   return revealRef;
 }
 
-function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSignal, interactionRef, onAssembled }) {
+// Mutable formation state, read and advanced inside the frame loop.
+class FormationState {
+  stop = 0;
+  prevStop = 0;
+  requested = 0;
+  switchedAt = 0;
+  warm = 0;
+  box = null;
+  flowPath = null;
+
+  request(stop) {
+    this.requested = stop;
+  }
+
+  setArea(area, size, mobile) {
+    this.box = areaToBox(area, size, mobile ? 60 : 50, [mobile ? 0 : 2.1, mobile ? 0.6 : 0]);
+    this.flowPath = buildFlowPath(this.box);
+  }
+
+  tick(time, delta) {
+    if (this.requested !== this.stop) {
+      this.prevStop = this.stop;
+      this.stop = this.requested;
+      this.switchedAt = time;
+    }
+    this.warm = THREE.MathUtils.damp(this.warm, this.stop === 3 ? 1 : 0, 2.2, delta);
+  }
+}
+
+// Formations exist only when the page passes a `formation` prop, so
+// pages that don't use them run exactly the original simulation.
+function useFormationState({ formation, formationArea, groups, bulbs, mobile }) {
+  const enabled = formation !== undefined && formation !== null;
+  const size = useThree((state) => state.size);
+  const [state] = useState(() => new FormationState());
+
+  useMemo(() => {
+    if (enabled) prepareFormations(groups, bulbs, mobile);
+  }, [enabled, groups, bulbs, mobile]);
+
+  useEffect(() => {
+    if (enabled) state.request(formation);
+  }, [enabled, formation, state]);
+
+  useEffect(() => {
+    const area = formationArea || { top: size.height * 0.15, bottom: size.height * 0.55, left: size.width * 0.08, right: size.width * 0.92 };
+    state.setArea(area, size, mobile);
+  }, [formationArea, size, mobile, state]);
+
+  return enabled ? state : null;
+}
+
+function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSignal, interactionRef, onAssembled, formation, formationArea }) {
   const { groups, bulbs } = useOrbFieldData(mobile);
+  const formationState = useFormationState({ formation, formationArea, groups, bulbs, mobile });
   const progressRef = useRef(progress);
   useEffect(() => {
     progressRef.current = progress;
@@ -768,8 +903,8 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
       <BackWall progressRef={progressRef} mobile={mobile} />
       <AdaptiveSceneLight progressRef={progressRef} interactionRef={interactionRef} />
       <DriftGroup mobile={mobile} reducedMotion={reducedMotion} interactionRef={interactionRef}>
-        <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} interactionRef={interactionRef} />
-        <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} interactionRef={interactionRef} />
+        <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} interactionRef={interactionRef} formationState={formationState} />
+        <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} interactionRef={interactionRef} formationState={formationState} />
 
         {groups.map((group) => (
           <AssemblingInstances
@@ -786,14 +921,14 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
 
         {/* These must render after the opaque orb field. Otherwise the dark
             source orb overwrites the bright body and leaves only a ring. */}
-        <BulbCores items={bulbs} progress={progress} />
-        <BulbHalos items={bulbs} progress={progress} />
+        <BulbCores items={bulbs} progress={progress} formationState={formationState} />
+        <BulbHalos items={bulbs} progress={progress} formationState={formationState} />
       </DriftGroup>
     </>
   );
 }
 
-export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, interactionRef = null, onReady = () => {}, onAssembled = () => {} }) {
+export default function OrbField({ progress, orbProgress = 1, motion = false, stirSignal = null, interactionRef = null, formation = null, formationArea = null, onReady = () => {}, onAssembled = () => {} }) {
   const mobile = useMemo(() => window.matchMedia("(max-width: 760px)").matches, []);
   const reducedMotion = useMemo(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches, []);
 
@@ -812,7 +947,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, st
         }}
       >
         <fog attach="fog" args={["#000000", 15, 42]} />
-        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} interactionRef={interactionRef} onAssembled={onAssembled} />
+        <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} interactionRef={interactionRef} onAssembled={onAssembled} formation={formation} formationArea={formationArea} />
         <EffectComposer multisampling={2} disableNormalPass>
           <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={mobile ? 1.35 : 1.7} mipmapBlur radius={0.55} />
         </EffectComposer>

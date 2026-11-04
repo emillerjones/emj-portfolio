@@ -11,19 +11,20 @@ const LINKS = [
 export default function Nav() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
+  const isHome = location.pathname === "/" || location.pathname === "/home-lab";
 
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
 
   return (
-    <header className={`site-nav${location.pathname === "/" ? " site-nav--home" : ""}`}>
+    <header className={`site-nav${isHome ? " site-nav--home" : ""}`}>
       <NavLink to="/" className="site-nav__brand" aria-label="Evan Miller-Jones home" onClick={() => setOpen(false)}>
-        <span>{location.pathname === "/" ? "Evan Miller-Jones" : "EMJ"}</span>
-        <small>{location.pathname === "/" ? "Solutions & Systems · Texas" : "Solutions & Systems Engineer"}</small>
+        <span>{isHome ? "Evan Miller-Jones" : "EMJ"}</span>
+        <small>{isHome ? "Solutions & Systems · Texas" : "Solutions & Systems Engineer"}</small>
       </NavLink>
 
-      {location.pathname === "/" && (
+      {isHome && (
         <a className="site-nav__mobile-resume" href="/resume.pdf" download>
           Résumé <span aria-hidden="true">↓</span>
         </a>
