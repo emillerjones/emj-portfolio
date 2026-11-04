@@ -5,6 +5,7 @@ import PageTracker from "./components/PageTracker";
 import HomePage from "./pages/HomePage";
 import StoryPage from "./pages/StoryPage";
 import ProjectsPage from "./pages/ProjectsPage";
+import ProjectsPage2 from "./pages/ProjectsPage2";
 
 export default function App() {
   return (
@@ -20,6 +21,7 @@ export default function App() {
         <Route path="/mystory2" element={<Navigate to="/mystory" replace />} />
         <Route path="/mystory3" element={<Navigate to="/mystory" replace />} />
         <Route path="/projects" element={<ProjectsPage />} />
+        <Route path="/projects2" element={<ProjectsPage2 />} />
         <Route path="/mystory-b" element={<Navigate to="/mystory" replace />} />
         <Route path="/projects-b" element={<Navigate to="/projects" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
