@@ -72,6 +72,7 @@ function HorizonFact({ summary }) {
 
 export default function HomePage() {
   const [stop, setStop] = useState(0);
+  const [hintDismissed, setHintDismissed] = useState(false);
   const [entrance, setEntrance] = useState(0.18);
   const [ready, setReady] = useState(false);
   const [paused, setPaused] = useState(() => window.matchMedia("(prefers-reduced-motion: reduce)").matches);
@@ -84,8 +85,9 @@ export default function HomePage() {
   const summary = useHorizonSummary();
 
   const go = useCallback((direction) => {
-    setStop((current) => Math.max(0, Math.min(LAST, current + direction)));
-  }, []);
+    const next = Math.max(0, Math.min(LAST, stop + direction));
+    if (next !== stop) { setStop(next); setHintDismissed(true); }
+  }, [stop]);
 
   // Short light-up entrance for the opening view, as on the current home page.
   useEffect(() => {
@@ -108,15 +110,17 @@ export default function HomePage() {
       const height = window.innerHeight;
       if (width <= 760) {
         const captionTop = captionRef.current?.getBoundingClientRect().top ?? height * 0.55;
-        setArea({ top: 96, bottom: Math.max(240, captionTop - 18), left: 18, right: width - 18 });
+        setArea({ top: 96, bottom: Math.max(240, captionTop - 18), left: 18, right: width - 60 });
       } else {
         const introRight = introRef.current?.getBoundingClientRect().right ?? width * 0.42;
         setArea({ top: 120, bottom: height - 110, left: Math.min(introRight + 56, width * 0.55), right: width - 72 });
       }
     };
     measure();
+    const observer = new ResizeObserver(measure);
+    if (captionRef.current) observer.observe(captionRef.current);
     window.addEventListener("resize", measure);
-    return () => window.removeEventListener("resize", measure);
+    return () => { observer.disconnect(); window.removeEventListener("resize", measure); };
   }, []);
 
   useEffect(() => {
@@ -142,6 +146,7 @@ export default function HomePage() {
   const startGesture = (event) => {
     if (!event.isPrimary || event.target.closest("a, button")) return;
     gestureRef.current = { y: event.clientY, x: event.clientX };
+    event.currentTarget.setPointerCapture(event.pointerId);
   };
   const endGesture = (event) => {
     const gesture = gestureRef.current;
@@ -153,11 +158,10 @@ export default function HomePage() {
 
   const current = STOPS[stop];
   const Heading = stop === 0 ? "h1" : "h2";
-  const hint = stop === 0 ? "Swipe up to see how" : stop === LAST ? "Swipe down to go back" : "Swipe up for the next one";
 
   return (
     <main
-      className={`home-page home-story home-story--stop-${stop}`}
+      className={`home-page home-story home-main home-story--stop-${stop}`}
       ref={surfaceRef}
       aria-label="Evan Miller-Jones, solutions engineer"
       tabIndex={0}
@@ -187,9 +191,7 @@ export default function HomePage() {
         </SceneBoundary>
       </div>
 
-      <section className="home-story__caption" ref={captionRef} aria-live="polite">
-        <div className="home-story__intro" ref={introRef}>
-          <nav className="home-story__steps" aria-label="Story steps">
+          <nav className="home-main__progress" aria-label="Story steps">
             {STOPS.map((item, index) => (
               <button
                 key={item.eyebrow}
@@ -197,10 +199,14 @@ export default function HomePage() {
                 className={index === stop ? "is-active" : ""}
                 aria-current={index === stop ? "step" : undefined}
                 aria-label={index === 0 ? "Introduction" : item.eyebrow}
-                onClick={() => setStop(index)}
+                onClick={() => { setStop(index); if (index !== stop) setHintDismissed(true); }}
               />
             ))}
+            <span className="home-main__count" aria-hidden="true">{String(stop + 1).padStart(2, "0")} / 04</span>
           </nav>
+
+      <section className="home-story__caption" ref={captionRef} aria-live="polite">
+        <div className="home-story__intro" ref={introRef}>
           <div className="home-story__panel" key={stop}>
             <p className="home-story__eyebrow">{current.eyebrow}</p>
             <Heading className="home-story__title">{current.title}</Heading>
@@ -208,24 +214,20 @@ export default function HomePage() {
             {current.facts && <ul className="home-story__facts">{current.facts.map((fact) => <li key={fact}>{fact}</li>)}</ul>}
             {current.live && <HorizonFact summary={summary} />}
           </div>
-          <nav className="home-page__actions" aria-label="Explore my work">
-            <Link className="home-page__primary" to="/projects">View projects <span aria-hidden="true">↗</span></Link>
-            <Link to="/mystory">My story <span aria-hidden="true">→</span></Link>
-          </nav>
+
         </div>
       </section>
 
-      <p className="home-story__hint" aria-hidden="true">
-        <span className="home-story__hint-arrow">{stop === LAST ? "↓" : "↑"}</span>{hint}
-      </p>
-
-      <footer className="home-page__footer home-story__footer">
-        <a className="home-page__contact" href="mailto:evan.millerjones@gmail.com">Let’s talk <span aria-hidden="true">↗</span></a>
-        <nav aria-label="Professional profiles">
-          <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
-          <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
+      <p className={`home-main__hint${hintDismissed ? " is-dismissed" : ""}`} aria-hidden="true"><span>↑</span> Swipe up to explore</p>
+      <footer className="home-main__bar">
+        <nav aria-label="Explore my work">
+          <Link className="home-main__projects" to="/projects">Projects <span aria-hidden="true">↗</span></Link>
+          <Link to="/mystory">My story <span aria-hidden="true">→</span></Link>
+          <a href="mailto:evan.millerjones@gmail.com">Email <span aria-hidden="true">↗</span></a>
         </nav>
-        <button className="home-page__motion" type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>{paused ? "Resume motion" : "Pause motion"}</button>
+        <button type="button" className="home-main__pause" aria-label={paused ? "Resume motion" : "Pause motion"} title={paused ? "Resume motion" : "Pause motion"} aria-pressed={paused} onClick={() => setPaused((value) => !value)}>
+          <svg width="14" height="14" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">{paused ? <path d="M4 2.5 13 8 4 13.5Z" /> : <path d="M4 3h3v10H4zM10 3h3v10h-3z" />}</svg>
+        </button>
       </footer>
     </main>
   );

@@ -11,8 +11,7 @@ const LINKS = [
 export default function Nav() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const isPreview = location.pathname === "/home2";
-  const isHome = location.pathname === "/" || isPreview;
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -48,7 +47,7 @@ export default function Nav() {
             {({ isActive }) => <span className={isActive ? "is-active" : ""}>{link.label}</span>}
           </NavLink>
         ))}
-        {isPreview && <div className="site-nav__profiles" aria-label="Professional profiles">
+        {isHome && <div className="site-nav__profiles" aria-label="Professional profiles">
           <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
           <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
         </div>}

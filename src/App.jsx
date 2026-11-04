@@ -3,7 +3,6 @@ import { Navigate, Route, Routes } from "react-router-dom";
 import Nav from "./components/Nav";
 import PageTracker from "./components/PageTracker";
 import HomePage from "./pages/HomePage";
-import Home2 from "./pages/Home2";
 import StoryPage from "./pages/StoryPage";
 import ProjectsPage from "./pages/ProjectsPage";
 
@@ -14,7 +13,7 @@ export default function App() {
       <Nav />
       <Routes>
         <Route path="/" element={<HomePage />} />
-        <Route path="/home2" element={<Home2 />} />
+        <Route path="/home2" element={<Navigate to="/" replace />} />
         <Route path="/home-lab" element={<Navigate to="/" replace />} />
         <Route path="/home-lab2" element={<Navigate to="/" replace />} />
         <Route path="/mystory" element={<StoryPage />} />
