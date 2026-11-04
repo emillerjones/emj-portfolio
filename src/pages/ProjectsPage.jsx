@@ -1,6 +1,8 @@
 import { Link } from "react-router-dom";
 import useHorizonSummary from "../hooks/useHorizonSummary";
+import useInViewOnce from "../hooks/useInViewOnce";
 import "./ProjectsPage.css";
+import "./ProjectsPage2.css";
 
 // Selected projects and the decisions behind their implementation.
 // Lead with the problem and result, then show the decisions behind the work.
@@ -116,9 +118,18 @@ const SUPPORTING = [
   },
 ];
 
-function RecoveryDiagram() {
+// In the v2 preview, diagrams play a one-time "work flowing through the
+// system" pulse when they scroll into view. Without the variant, the
+// class list is exactly as before.
+function useDiagramFlow(flow) {
+  const [ref, seen] = useInViewOnce({ enabled: flow });
+  return [ref, flow ? ` is-flow${seen ? " is-flowing" : ""}` : ""];
+}
+
+function RecoveryDiagram({ flow }) {
+  const [ref, flowClass] = useDiagramFlow(flow);
   return (
-    <div className="selected-work-diagram selected-work-diagram--recovery" role="img" aria-label="Recovery Community architecture: public site, admission, protected member spaces, and human moderation supported by reports and optional AI flags">
+    <div ref={ref} className={`selected-work-diagram selected-work-diagram--recovery${flowClass}`} role="img" aria-label="Recovery Community architecture: public site, admission, protected member spaces, and human moderation supported by reports and optional AI flags">
       <span className="selected-work-diagram__label">Architecture · trust boundaries</span>
       <div className="selected-work-row">
         <div><b>Public site</b><small>Owner-edited pages</small></div><i>→</i>
@@ -137,9 +148,10 @@ function RecoveryDiagram() {
   );
 }
 
-function RecordsDiagram() {
+function RecordsDiagram({ flow }) {
+  const [ref, flowClass] = useDiagramFlow(flow);
   return (
-    <div className="selected-work-diagram selected-work-diagram--records" role="img" aria-label="Records workflow: intake, validate, route, track, connected to Oracle and WebCenter Content">
+    <div ref={ref} className={`selected-work-diagram selected-work-diagram--records${flowClass}`} role="img" aria-label="Records workflow: intake, validate, route, track, connected to Oracle and WebCenter Content">
       <span className="selected-work-diagram__label">Daily operations · 30–50 staff</span>
       <div className="selected-work-flow">
         <div><b>Intake</b><small>Documents</small></div><i>→</i>
@@ -173,7 +185,7 @@ function LiveCounts({ summary }) {
   );
 }
 
-function Project({ project, summary }) {
+function Project({ project, summary, flow }) {
   return (
     <article className="selected-work-project" aria-labelledby={`selected-work-${project.number}`}>
       <header className="selected-work-project__head">
@@ -192,8 +204,8 @@ function Project({ project, summary }) {
       <div className="selected-work-project__body">
         <div className="selected-work-project__media">
           {project.media === "horizon" && <HorizonShot />}
-          {project.media === "recovery" && <RecoveryDiagram />}
-          {project.media === "records" && <RecordsDiagram />}
+          {project.media === "recovery" && <RecoveryDiagram flow={flow} />}
+          {project.media === "records" && <RecordsDiagram flow={flow} />}
         </div>
 
         <div className="selected-work-project__text">
@@ -231,11 +243,19 @@ function Project({ project, summary }) {
   );
 }
 
-export default function ProjectsPage() {
+// `variant="v2"` (the /projects2 preview) adds the blueprint grid and the
+// diagram flow. The default renders the page exactly as before.
+export default function ProjectsPage({ variant }) {
   const summary = useHorizonSummary();
+  const v2 = variant === "v2";
 
   return (
-    <main className="selected-work">
+    <main className={`selected-work${v2 ? " selected-work--v2" : ""}`}>
+      {v2 && (
+        <p className="selected-work-preview">
+          Preview: blueprint grid and flowing diagrams. <Link to="/projects">Compare with the current page →</Link>
+        </p>
+      )}
       <section className="selected-work-intro">
         <p className="selected-work-eyebrow">Selected work · 2013–present</p>
         <h1>Real processes.<br />Better systems.</h1>
@@ -244,7 +264,7 @@ export default function ProjectsPage() {
       </section>
 
       <section className="selected-work-projects" aria-label="Major projects">
-        {PROJECTS.map((project) => <Project key={project.number} project={project} summary={summary} />)}
+        {PROJECTS.map((project) => <Project key={project.number} project={project} summary={summary} flow={v2} />)}
       </section>
 
       <section className="selected-work-supporting" aria-labelledby="selected-work-supporting-title">
