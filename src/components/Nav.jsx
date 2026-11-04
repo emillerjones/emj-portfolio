@@ -4,6 +4,7 @@ import "./Nav.css";
 
 const LINKS = [
   { label: "Home", to: "/" },
+  { label: "Home 2", to: "/home2" },
   { label: "My Story", to: "/mystory" },
   { label: "Projects", to: "/projects" },
 ];
@@ -17,7 +18,7 @@ export default function Nav() {
   }, [location.pathname]);
 
   return (
-    <header className={`site-nav${location.pathname === "/" ? " site-nav--home" : ""}`}>
+    <header className={`site-nav${location.pathname === "/" ? " site-nav--home" : ""}${location.pathname === "/home2" ? " site-nav--home2" : ""}`}>
       <NavLink to="/" className="site-nav__brand" aria-label="Evan Miller-Jones home" onClick={() => setOpen(false)}>
         <span>EMJ</span>
         <small>Solutions &amp; Systems Engineer</small>
