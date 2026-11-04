@@ -19,13 +19,13 @@ export default function Nav() {
   return (
     <header className={`site-nav${location.pathname === "/" ? " site-nav--home" : ""}`}>
       <NavLink to="/" className="site-nav__brand" aria-label="Evan Miller-Jones home" onClick={() => setOpen(false)}>
-        <span>EMJ</span>
-        <small>Solutions &amp; Systems Engineer</small>
+        <span>{location.pathname === "/" ? "Evan Miller-Jones" : "EMJ"}</span>
+        <small>{location.pathname === "/" ? "Solutions & Systems · Texas" : "Solutions & Systems Engineer"}</small>
       </NavLink>
 
       {location.pathname === "/" && (
         <a className="site-nav__mobile-resume" href="/resume.pdf" download>
-          Download résumé <span aria-hidden="true">↓</span>
+          Résumé <span aria-hidden="true">↓</span>
         </a>
       )}
 

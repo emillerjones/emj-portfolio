@@ -74,7 +74,11 @@ export default function HomePage() {
   const endGesture = () => { gestureRef.current = null; };
 
   return (
-    <main className="home-page" ref={surfaceRef} aria-labelledby="home-page-title">
+    <main className="home-page" ref={surfaceRef} aria-labelledby="home-page-title" tabIndex={0} onKeyDown={(event) => {
+      if (event.target !== event.currentTarget || !["ArrowUp", "ArrowDown"].includes(event.key)) return;
+      event.preventDefault();
+      adjust(brightnessRef.current + (event.key === "ArrowUp" ? 0.1 : -0.1));
+    }}>
       <div className="home-page__scene" aria-hidden="true">
         <SceneBoundary>
           <Suspense fallback={null}>
@@ -85,23 +89,15 @@ export default function HomePage() {
       <div className="home-page__gesture" aria-hidden="true" onPointerDown={startGesture} onPointerMove={moveGesture} onPointerUp={endGesture} onPointerCancel={endGesture} onLostPointerCapture={endGesture} />
 
       <section className="home-page__intro">
-        <p className="home-page__eyebrow">Evan Miller-Jones <span> / Texas</span></p>
-        <p className="home-page__role">Solutions &amp; Systems Engineer</p>
-        <h1 id="home-page-title">Software that fits<br />the way people<br /><em>actually work.</em></h1>
-        <p className="home-page__description">I turn real workflows into useful software.<br className="home-page__desktop-break" /> From records operations to community platforms, I build around the people using it.</p>
+        <h1 id="home-page-title">Real workflows.<br /><em>Useful software.</em></h1>
+        <p className="home-page__description">I design and build systems for the people using them, from records operations to community platforms.</p>
         <nav className="home-page__actions" aria-label="Explore my work">
           <Link className="home-page__primary" to="/projects">View projects <span aria-hidden="true">↗</span></Link>
           <Link to="/mystory">My story <span aria-hidden="true">→</span></Link>
         </nav>
-        <a className="home-page__proof" href="/projects"><span aria-hidden="true">01 —</span> Explore the systems, decisions, and results <span aria-hidden="true">↗</span></a>
       </section>
 
-      <aside className="home-page__instrument" aria-label="Scene controls">
-        <div className="home-page__instrument-heading"><span>Light study</span><button type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>{paused ? "Resume motion" : "Pause motion"}</button></div>
-        <label htmlFor="home-page-brightness">Brightness <output>{Math.round(brightness * 100)}%</output></label>
-        <input id="home-page-brightness" type="range" min="0" max="100" value={Math.round(brightness * 100)} onChange={(event) => adjust(Number(event.target.value) / 100)} />
-        <p className={interacted ? "is-used" : ""}>Swipe up to illuminate. Down to dim.</p>
-      </aside>
+      <p className={`home-page__hint${interacted ? " is-used" : ""}`}>Swipe up to illuminate. Down to dim.<span className="home-page__keyboard-hint"> Keyboard: focus this page and use the up and down arrow keys.</span></p>
 
       <footer className="home-page__footer">
         <a className="home-page__contact" href="mailto:evan.millerjones@gmail.com">Let’s talk <span aria-hidden="true">↗</span></a>
@@ -109,6 +105,7 @@ export default function HomePage() {
           <a href="https://www.linkedin.com/in/evan-miller-jones-30762a28/" target="_blank" rel="noreferrer">LinkedIn</a>
           <a href="https://github.com/emillerjones" target="_blank" rel="noreferrer">GitHub</a>
         </nav>
+        <button className="home-page__motion" type="button" aria-pressed={paused} onClick={() => setPaused((value) => !value)}>{paused ? "Resume motion" : "Pause motion"}</button>
       </footer>
     </main>
   );
