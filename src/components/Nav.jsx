@@ -11,7 +11,7 @@ const LINKS = [
 export default function Nav() {
   const location = useLocation();
   const [open, setOpen] = useState(false);
-  const isHome = ["/", "/home-lab", "/home-lab2"].includes(location.pathname);
+  const isHome = location.pathname === "/";
 
   useEffect(() => {
     window.scrollTo(0, 0);

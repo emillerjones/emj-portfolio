@@ -47,3 +47,59 @@
 @media (prefers-reduced-motion: reduce) {
   .home-page * { transition: none; }
 }
+
+/* Project story and assembling orb formations. */
+.home-story { grid-template-rows: 1fr auto auto; touch-action: none; cursor: ns-resize; }
+.home-story a, .home-story button { cursor: pointer; }
+.home-story__caption { align-self: center; }
+.home-story__intro { max-width: 470px; }
+
+.home-story__steps { display: flex; gap: 8px; margin-bottom: 18px; }
+.home-story__steps button { width: 22px; height: 22px; padding: 0; border: 0; background: transparent; position: relative; }
+.home-story__steps button::after { content: ""; position: absolute; left: 0; right: 0; top: 50%; height: 3px; margin-top: -1.5px; border-radius: 2px; background: rgb(218 233 255 / 28%); transition: background .3s ease; }
+.home-story__steps button.is-active::after { background: var(--accent); }
+
+/* Fixed height so the formation area doesn't jump between steps. */
+.home-story__panel { min-height: 236px; animation: home-story-in .55s cubic-bezier(.2,.7,.2,1) both; }
+@keyframes home-story-in { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+
+.home-story__eyebrow { color: var(--accent); font-size: 11px; font-weight: 600; letter-spacing: .14em; text-transform: uppercase; text-shadow: 0 1px 10px #000; }
+.home-story__title { margin-top: 12px; font-family: var(--display); font-size: clamp(30px, 3.6vw, 52px); font-weight: 700; letter-spacing: -.035em; line-height: 1.1; text-shadow: 0 2px 24px #020407; }
+.home-story__title em { color: var(--accent); font-weight: inherit; }
+.home-story.home-page h1.home-story__title { font-size: clamp(38px, 4.6vw, 66px); }
+.home-story__body { max-width: 400px; margin-top: 14px; color: #d0d3d9; font-size: 14px; line-height: 1.6; text-shadow: 0 2px 12px #000; }
+
+.home-story__facts { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.home-story__facts li { padding: 5px 11px; border: 1px solid rgb(218 233 255 / 22%); border-radius: 999px; background: rgb(9 15 23 / 45%); backdrop-filter: blur(6px); color: var(--text); font-size: 12px; font-weight: 600; }
+.home-story__live { display: inline-flex; align-items: center; gap: 7px; color: #9fe3b4 !important; border-color: rgb(120 220 160 / 40%) !important; }
+.home-story__live i { width: 7px; height: 7px; border-radius: 50%; background: #6fe09a; box-shadow: 0 0 8px #6fe09a; animation: home-story-pulse 2s ease-in-out infinite; }
+@keyframes home-story-pulse { 50% { opacity: .35; } }
+
+.home-story__hint { display: flex; align-items: center; gap: 8px; color: #b9c3d1; font-size: 12px; letter-spacing: .03em; text-shadow: 0 1px 10px #000; pointer-events: none; }
+.home-story__hint-arrow { color: var(--accent); font-size: 15px; animation: home-story-nudge 1.8s ease-in-out infinite; }
+.home-story--stop-3 .home-story__hint-arrow { animation-name: home-story-nudge-down; }
+@keyframes home-story-nudge { 50% { transform: translateY(-4px); } }
+@keyframes home-story-nudge-down { 50% { transform: translateY(4px); } }
+
+.home-story__footer { font-size: 12px; }
+.home-story__footer .home-page__motion { font-size: 11px; }
+
+@media (max-width: 760px) {
+  .home-story { gap: 10px; }
+  .home-story__caption { align-self: end; }
+  .home-story__steps { margin-bottom: 12px; }
+  .home-story__panel { min-height: 222px; }
+  .home-story__eyebrow { font-size: 10px; }
+  .home-story__title { font-size: clamp(26px, 7.4vw, 34px); }
+  .home-story.home-page h1.home-story__title { font-size: clamp(32px, 8.6vw, 42px); }
+  .home-story__body { font-size: 13px; }
+  .home-story__facts li { font-size: 11px; }
+  .home-story__hint { font-size: 11px; }
+  .home-story__footer { font-size: 12px; }
+}
+@media (max-height: 530px) {
+  .home-story { touch-action: pan-y pinch-zoom; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .home-story__panel, .home-story__live i, .home-story__hint-arrow { animation: none; }
+}
