@@ -481,7 +481,7 @@ function LightBulbs({ items, reducedMotion, progressRef, interactionRef, formati
         const warm = formationState?.warm ?? 0;
         if (warm > 0.001) light.color.lerp(WARM_LIGHT, warm);
         light.distance = item.reach * 1.75;
-        const formationGain = formationState?.stop > 0 ? (formationState.stop === 3 ? 0.055 : 0.28) : 1;
+        const formationGain = formationState?.stop > 0 ? (formationState.stop === 3 ? 0.18 : 0.65) : 1;
         light.intensity = next * item.power * 2.35 * (1 + flash * 0.38) * formationGain;
       } else {
         light.intensity = 0;
@@ -532,7 +532,7 @@ function WarmableBasicMaterial({ base, warmColor, formationState, sprite = false
   useFrame(() => {
     const warm = formationState?.warm ?? 0;
     if (!materialRef.current || !formationState) return;
-    materialRef.current.color.copy(baseColor).lerp(warmColor, warm).multiplyScalar(1 - warm * 0.55);
+    materialRef.current.color.copy(baseColor).lerp(warmColor, warm).multiplyScalar(1 - warm * 0.25);
   });
   return sprite
     ? <spriteMaterial ref={materialRef} color={base} {...props} />
@@ -580,7 +580,7 @@ function MovingAnchor({ item, renderOrder, children }) {
     if (ref.current) {
       ref.current.position.set(...item.position);
       const source = item.source || item;
-      const formedScale = Math.min(0.22, (source.formScale || item.scale) / item.scale);
+      const formedScale = Math.min(0.42, (source.formScale || item.scale) / item.scale);
       ref.current.scale.setScalar(THREE.MathUtils.lerp(1, formedScale, source.formBlend || 0));
     }
   });
@@ -979,7 +979,7 @@ export default function OrbField({ progress, orbProgress = 1, motion = false, st
         <fog attach="fog" args={["#000000", 15, 42]} />
         <OrbScene mobile={mobile} reducedMotion={reducedMotion} progress={progress} orbProgress={orbProgress} motion={motion} stirSignal={stirSignal} interactionRef={interactionRef} onAssembled={onAssembled} formation={formation} formationArea={formationArea} />
         <EffectComposer multisampling={2} disableNormalPass>
-          <Bloom luminanceThreshold={0.55} luminanceSmoothing={0.18} intensity={formation > 0 ? 0.55 : (mobile ? 1.35 : 1.7)} mipmapBlur radius={0.55} />
+          <Bloom luminanceThreshold={0.35} luminanceSmoothing={0.18} intensity={formation === 1 ? 1.1 : formation > 0 ? 0.95 : (mobile ? 1.35 : 1.7)} mipmapBlur radius={0.55} />
         </EffectComposer>
       </Canvas>
     </div>
