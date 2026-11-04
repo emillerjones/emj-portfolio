@@ -20,16 +20,16 @@ const PROJECTS = [
     ],
     decisions: [
       ["Protecting different kinds of spaces.", "Public pages, member discussions, private conversations, and staff spaces need different access rules. I enforced those boundaries on the server and in real-time connections, so hiding a link is never the only protection."],
-      ["Giving staff a workable moderation process.", "A community needs human oversight, not just automated checks. Member reports, review queues, and staff-only spaces support that work; optional AI flagging helps surface Lounge messages for staff to assess."],
-      ["Keeping routine changes out of the codebase.", "The owner needs to run the community without asking a developer for every update. Administration screens let them edit public content and manage community settings directly."],
+      ["Giving staff a workable moderation process.", "Member reports, review queues, and staff-only spaces support human oversight; optional AI flagging helps surface Lounge messages for staff to assess."],
+      ["Keeping routine changes out of the codebase.", "Administration screens let the owner edit public content and manage community settings directly, without requesting code changes."],
     ],
     result: "A working community platform with member admissions, protected spaces, human moderation, and owner administration. Preparing for private beta and real-user validation.",
     caseStudy: [
       ["What I built", "Membership applications and admission, role-based access, a forum with polls and edit history, private messaging with photos, a real-time Lounge, notifications, staff chat and staff-only announcements, a moderation queue for member reports, and public pages the owner edits without a developer."],
-      ["Human moderation and optional AI assistance", "Members can report content for staff review. Staff use moderation queues and private working spaces to manage the community. Optional Lounge AI checks run in a background queue with retries and crash recovery, so posting does not wait on the provider. Flagged messages include nearby context for staff to assess; the owner controls the AI settings."],
+      ["Human moderation and optional AI assistance", "Members can report content for staff review. Staff use moderation queues and private working spaces to manage the community. Optional Lounge AI checks run in a background queue with retries and crash recovery, so posting does not wait on the provider. Flagged messages include nearby context for staff to assess. The owner controls the AI settings; changes to thresholds and review modes are recorded with who made them."],
       ["Account safety", "Server-side checks on every request for account status, role, ownership and conversation membership. Accounts are deactivated reversibly instead of deleted."],
     ],
-    tags: ["React", "Express", "PostgreSQL", "Socket.IO", "OpenAI", "Product design"],
+    tags: ["React", "Express", "PostgreSQL", "Socket.IO", "OpenAI moderation", "Product design"],
     links: [
       { label: "Visit the public site", href: "https://www.recoverywiththeexitdrug.org/" },
       { label: "Client code", href: "https://github.com/emillerjones/recovery-community-client" },
@@ -49,7 +49,7 @@ const PROJECTS = [
       ["Stack", "Access · VBA · SQL · Oracle · ODBC · WebCenter Content"],
     ],
     decisions: [
-      ["Connecting departments without flattening their work.", "Each team had its own requirements. I brought their workflows into one Access/VBA application connected to Oracle, while retaining the steps each department needed."],
+      ["Connecting departments without flattening their work.", "I brought departmental workflows into one Access/VBA application connected to Oracle, while retaining the steps each team needed."],
       ["Catching incomplete work before it moved forward.", "An upload was not enough to prove processing was finished. I replaced purchased scanning software with automated imports and validation checks that kept incomplete work from advancing."],
       ["Verifying migration data before the final transfer.", "The source data had to fit a different system. I mapped it into staging tables that mirrored the destination, wrote transformation queries, coordinated staff testing, and checked results before the vendor’s transfer."],
     ],
@@ -81,7 +81,7 @@ const PROJECTS = [
     ],
     decisions: [
       ["Working with the scheduling habit already in place.", "Asking every guild to adopt another calendar would add work. I built around existing Raid-Helper events and a companion import extension, bringing schedules together without replacing how leaders create them."],
-      ["Making the schedule easy to reach.", "Players need to check events quickly. The calendar can be opened from a shared link without creating a Horizon account."],
+      ["Making the schedule easy to reach.", "The calendar can be opened from a shared link without creating a Horizon account."],
       ["Handling repeat imports without duplicate events.", "The same event can be imported again as its details change. The database uses the source event ID to update the existing record rather than create another copy."],
     ],
     caseStudy: [
@@ -186,7 +186,7 @@ function Project({ project, summary }) {
 
       <div className="p2-summary">
         <div><h3>The problem</h3><p>{project.problem}</p></div>
-        <div className="p2-summary__outcome"><h3>{project.live ? "In use" : "Result & status"}</h3><p>{project.result}</p>{project.live && <LiveCounts summary={summary} />}</div>
+        <div className="p2-summary__outcome"><h3>{project.live ? "In use" : project.media === "records" ? "Result" : "Result & status"}</h3><p>{project.result}</p>{project.live && <LiveCounts summary={summary} />}</div>
       </div>
 
       <div className="p2-project__body">
@@ -243,7 +243,7 @@ export default function ProjectsPage2() {
       <section className="p2-intro">
         <p className="p2-eyebrow">Selected work · 2013–present</p>
         <h1>Real processes.<br />Better systems.</h1>
-        <p className="p2-lede">Three systems built around the people doing the work. The problems they faced, what I delivered, and the challenges and decisions that shaped each result.</p>
+        <p className="p2-lede">Three systems built around the people doing the work. For each: the problem, what I delivered, and the challenges and decisions that shaped the result.</p>
       </section>
 
       <section className="p2-projects" aria-label="Major projects">
