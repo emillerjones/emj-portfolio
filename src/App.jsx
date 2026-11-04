@@ -20,7 +20,7 @@ export default function App() {
         <Route path="/mystory2" element={<Navigate to="/mystory" replace />} />
         <Route path="/mystory3" element={<Navigate to="/mystory" replace />} />
         <Route path="/projects" element={<ProjectsPage />} />
-        <Route path="/projects2" element={<ProjectsPage variant="v2" />} />
+        <Route path="/projects2" element={<Navigate to="/projects" replace />} />
         <Route path="/mystory-b" element={<Navigate to="/mystory" replace />} />
         <Route path="/projects-b" element={<Navigate to="/projects" replace />} />
         <Route path="*" element={<Navigate to="/" replace />} />
