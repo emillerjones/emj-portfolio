@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
+import useHorizonSummary from "../hooks/useHorizonSummary";
 import "./StoryPage.css";
 
 
@@ -39,11 +40,11 @@ const CHAPTERS = [
     org: "Fullstack Academy · Independent product work",
     body: [
       "When the AppointmentWave engagement ended, I enrolled in Fullstack Academy's software-engineering program. I expected stronger fundamentals might make AI less necessary. The program strengthened my understanding of JavaScript and full-stack systems. Afterward, I began working with Codex, which expanded the scale and complexity of work I could take on. AI did not recede; I became better equipped to use it.",
-      "Since boot camp, I have built Recovery Community, Horizon, this portfolio, Animation Lab, and focused browser extensions. Recovery Community is a stakeholder-led, full-stack platform with membership admissions, authenticated forums, messaging, moderation, notifications, and a real-time community Lounge. Horizon is a deployed React, Express, PostgreSQL, and Discord product used by 30+ guilds to organize more than 500 raids.",
-      "Today I work as an AI-augmented developer. AI accelerates implementation and gives me more room to focus on architecture, product behavior, usability, and creative decisions. I remain responsible for understanding the system, inspecting the implementation, testing the behavior, explaining the decisions, and what ultimately ships—while continuing to strengthen my independent skills.",
+      "Since boot camp, I have built Recovery Community, Horizon, this portfolio, Animation Lab, and focused browser extensions. Recovery Community is a stakeholder-led, full-stack platform with membership admissions, authenticated forums, messaging, moderation, notifications, and a real-time community Lounge. Horizon is a deployed React, Express, PostgreSQL, and Discord product used by 60+ guilds to organize more than 2,700 raids.",
+      "Today I work as a solutions engineer who builds with AI. AI accelerates implementation and gives me more room to focus on architecture, product behavior, usability, and creative decisions. I remain responsible for understanding the system, inspecting the implementation, testing the behavior, explaining the decisions, and what ultimately ships—while continuing to strengthen my independent skills.",
     ],
     quote: "I build with leverage. I remain accountable for the result.",
-    note: { label: "In active use", before: "Horizon serves ", strong: "30+ guilds", after: " and has tracked 500+ raids." },
+    note: { label: "In active use", liveHorizon: true },
     links: [
       { label: "View projects", to: "/projects" },
       { label: "Visit Horizon", href: "https://raidhelper-client.vercel.app/" },
@@ -85,7 +86,18 @@ function useSpineFill(sectionRef, fillRef) {
   }, [sectionRef, fillRef]);
 }
 
-function Note({ note }) {
+function Note({ note, horizon }) {
+  // Horizon's note uses the same live counts as the Projects page, with a
+  // rounded fallback until the API responds.
+  if (note.liveHorizon) {
+    const plus = horizon.live ? "" : "+";
+    return (
+      <div className="story-note">
+        <span className="story-note__label">{note.label}</span>
+        <p>Horizon serves <b>{horizon.guilds}{plus} guilds</b> and has tracked {horizon.raids.toLocaleString()}{plus} raids.</p>
+      </div>
+    );
+  }
   return (
     <div className="story-note">
       <span className="story-note__label">{note.label}</span>
@@ -110,6 +122,7 @@ export default function StoryPage() {
   const spineTopFillRef = useRef(null);
   const ledgerBottomRef = useRef(null);
   const spineBottomFillRef = useRef(null);
+  const horizon = useHorizonSummary();
 
   useSpineFill(ledgerTopRef, spineTopFillRef);
   useSpineFill(ledgerBottomRef, spineBottomFillRef);
@@ -257,7 +270,7 @@ export default function StoryPage() {
                     </nav>
                   )}
                 </div>
-                {chapter.note && <Note note={chapter.note} />}
+                {chapter.note && <Note note={chapter.note} horizon={horizon} />}
               </div>
             </article>
           ))}
