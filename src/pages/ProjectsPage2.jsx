@@ -3,32 +3,30 @@ import useHorizonSummary from "../hooks/useHorizonSummary";
 import "./ProjectsPage2.css";
 
 // Redesigned Projects page, shown at /projects2 for side-by-side review.
-// Each project leads with a short "at a glance" block and the decisions
-// that shaped it; the long case study is folded into a disclosure.
+// Lead with the problem and result, then show the decisions behind the work.
 
 const PROJECTS = [
   {
     number: "01",
     name: "Recovery Community",
     type: "Stakeholder community platform",
-    status: "Built with the community’s owner · 2026",
+    status: "Preparing for private beta · 2026",
+    problem: "An established Facebook-based recovery community needed an owned platform that could support its members, staff, and day-to-day operation.",
     media: "recovery",
     glance: [
       ["Role", "Solution designer and full-stack developer"],
       ["Worked with", "The community’s owner and staff"],
-      ["Stack", "React · Express · PostgreSQL · Socket.IO · OpenAI moderation"],
+      ["Stack", "React · Express · PostgreSQL · Socket.IO"],
     ],
     decisions: [
-      ["AI flags, people decide.", "New Lounge messages are checked by OpenAI’s moderation model and queued for staff. Nothing is removed automatically."],
-      ["The owner controls the AI.", "Checks stay off until the owner turns them on. The owner sets the cutoff for each of 13 categories, and every change is recorded with who made it."],
-      ["Send as little as possible.", "Only the message text goes to the provider, with no name or account details, and saved results are deleted after 90 days."],
-      ["Bring the history along.", "Facebook posts are imported under their original authors, with the importer recorded, so the community’s past moves with it."],
+      ["Protecting different kinds of spaces.", "Public pages, member discussions, private conversations, and staff spaces need different access rules. I enforced those boundaries on the server and in real-time connections, so hiding a link is never the only protection."],
+      ["Giving staff a workable moderation process.", "A community needs human oversight, not just automated checks. Member reports, review queues, and staff-only spaces support that work; optional AI flagging helps surface Lounge messages for staff to assess."],
+      ["Keeping routine changes out of the codebase.", "The owner needs to run the community without asking a developer for every update. Administration screens let them edit public content and manage community settings directly."],
     ],
-    result: "A complete platform shaped around how the community already works, being prepared for its move off Facebook.",
+    result: "A working community platform with member admissions, protected spaces, human moderation, and owner administration. Preparing for private beta and real-user validation.",
     caseStudy: [
-      ["Problem", "An established Facebook recovery community wanted a home it owns: safer, moderated, and built around how its members actually support each other."],
       ["What I built", "Membership applications and admission, role-based access, a forum with polls and edit history, private messaging with photos, a real-time Lounge, notifications, staff chat and staff-only announcements, a moderation queue for member reports, and public pages the owner edits without a developer."],
-      ["Moderation design", "AI checks run in a background queue that retries failures and recovers after crashes, so posting never waits on the AI. Staff see each flagged message with nearby context and choose to keep or delete it. A written runbook covers enabling, tuning, privacy, and rollback, and the feature has its own integration tests against an isolated database."],
+      ["Human moderation and optional AI assistance", "Members can report content for staff review. Staff use moderation queues and private working spaces to manage the community. Optional Lounge AI checks run in a background queue with retries and crash recovery, so posting does not wait on the provider. Flagged messages include nearby context for staff to assess; the owner controls the AI settings."],
       ["Account safety", "Server-side checks on every request for account status, role, ownership and conversation membership. Accounts are deactivated reversibly instead of deleted."],
     ],
     tags: ["React", "Express", "PostgreSQL", "Socket.IO", "OpenAI", "Product design"],
@@ -43,6 +41,7 @@ const PROJECTS = [
     name: "Records Operations Platform",
     type: "Internal operational system",
     status: "TCEQ · 2016–2023",
+    problem: "Departments relied on separate tools for imaging, public information, quality control, redaction, and records management. Their work needed to connect without losing each department’s requirements.",
     media: "records",
     glance: [
       ["Role", "PacoTech’s sole technical staff member on these systems"],
@@ -50,14 +49,12 @@ const PROJECTS = [
       ["Stack", "Access · VBA · SQL · Oracle · ODBC · WebCenter Content"],
     ],
     decisions: [
-      ["One shared system.", "Imaging, public information, QC, redaction and records management each had their own tools. I brought them into one application while keeping each department’s requirements."],
-      ["Validate at the door.", "I replaced purchased scanning software with automated imports that stopped incomplete work from moving forward."],
-      ["Rehearse the migration.", "For the move to Oracle WebCenter Content, I mirrored the destination tables in staging and verified the transformed data with queries before the vendor’s final transfer."],
-      ["Reuse what already works.", "A later redaction contract got a separate, improved application built on the proven parts of the original."],
+      ["Connecting departments without flattening their work.", "Each team had its own requirements. I brought their workflows into one Access/VBA application connected to Oracle, while retaining the steps each department needed."],
+      ["Catching incomplete work before it moved forward.", "An upload was not enough to prove processing was finished. I replaced purchased scanning software with automated imports and validation checks that kept incomplete work from advancing."],
+      ["Verifying migration data before the final transfer.", "The source data had to fit a different system. I mapped it into staging tables that mirrored the destination, wrote transformation queries, coordinated staff testing, and checked results before the vendor’s transfer."],
     ],
     result: "The main daily application for 30–50 staff, and migration mapping and validation for 3,079,205 items.",
     caseStudy: [
-      ["Problem", "Departments had their own software and workflows for imaging, public information, quality control, redaction, and records management. The operation needed those processes to work together, while preserving the requirements of each department."],
       ["What I built", "One centralized Access/VBA application connected to Oracle through ODBC. Automated imports, validation checks, work queues, dashboards, and reporting connected the work across departments."],
       ["Enterprise migration", "For the InSight-to-Oracle WebCenter Content migration, I developed the primary data map, mirrored destination tables in a staging environment, and wrote transformation queries to prepare data for the vendor’s final transfer. I designed test plans, coordinated staff testing, and verified results with database queries."],
       ["Separate DRR application", "A later Document Review and Redaction contract needed workflows for two departments. I reused the relevant parts of my original application and built an improved version tracking reviews, findings, errors, and staff productivity alongside WCC’s redaction module."],
@@ -73,6 +70,8 @@ const PROJECTS = [
     name: "Horizon",
     type: "Independent product",
     status: "Live product · 2026",
+    problem: "Players had to check multiple Discord servers to find raids. Raid leaders already had a scheduling workflow, so a shared view needed to work with it.",
+    result: "A deployed calendar and live radar that bring tracked Raid-Helper events into one place, with a companion extension for importing events.",
     media: "horizon",
     live: true,
     glance: [
@@ -81,13 +80,11 @@ const PROJECTS = [
       ["Stack", "React · Express · PostgreSQL · Discord data · Chrome extension"],
     ],
     decisions: [
-      ["Use what guilds already post.", "Horizon reads the raid posts guilds already make in Discord, so raid leaders don’t change how they work."],
-      ["No account to see the schedule.", "Open a link and the calendar is there."],
-      ["Read only raid posts.", "Nothing else from a server is collected."],
-      ["One source, two views.", "The calendar and the live radar are fed by the same tracked posts, so they never disagree."],
+      ["Working with the scheduling habit already in place.", "Asking every guild to adopt another calendar would add work. I built around existing Raid-Helper events and a companion import extension, bringing schedules together without replacing how leaders create them."],
+      ["Making the schedule easy to reach.", "Players need to check events quickly. The calendar can be opened from a shared link without creating a Horizon account."],
+      ["Handling repeat imports without duplicate events.", "The same event can be imported again as its details change. The database uses the source event ID to update the existing record rather than create another copy."],
     ],
     caseStudy: [
-      ["Problem", "Raid schedules were scattered across many Discord servers, making it hard to see what was happening across a community."],
       ["What I built", "A React calendar and live radar backed by an Express API and PostgreSQL, with Discord imports, analytics, deployment, and a companion Chrome extension for importing Raid-Helper events."],
     ],
     tags: ["React", "Express", "PostgreSQL", "Discord", "Chrome APIs"],
@@ -121,7 +118,7 @@ const SUPPORTING = [
 
 function RecoveryDiagram() {
   return (
-    <div className="p2-diagram p2-diagram--recovery" role="img" aria-label="Recovery Community architecture: public site, admission, protected community spaces, and AI-assisted moderation with staff review">
+    <div className="p2-diagram p2-diagram--recovery" role="img" aria-label="Recovery Community architecture: public site, admission, protected member spaces, and human moderation supported by reports and optional AI flags">
       <span className="p2-diagram__label">Architecture · trust boundaries</span>
       <div className="p2-row">
         <div><b>Public site</b><small>Owner-edited pages</small></div><i>→</i>
@@ -133,8 +130,8 @@ function RecoveryDiagram() {
         <span>Forum</span><span>Messages</span><span>Lounge</span>
         <span>Notifications</span><span>Staff chat</span><span>Reports</span>
       </div>
-      <div className="p2-ai">
-        <span>Lounge message</span><i>→</i><span>AI check</span><i>→</i><span className="is-human">Staff decide</span>
+      <div className="p2-moderation">
+        <div><span>Member reports</span><span>Optional AI flags</span></div><i>→</i><span className="is-human">Staff review</span>
       </div>
     </div>
   );
@@ -187,6 +184,11 @@ function Project({ project, summary }) {
         </div>
       </header>
 
+      <div className="p2-summary">
+        <div><h3>The problem</h3><p>{project.problem}</p></div>
+        <div className="p2-summary__outcome"><h3>{project.live ? "In use" : "Result & status"}</h3><p>{project.result}</p>{project.live && <LiveCounts summary={summary} />}</div>
+      </div>
+
       <div className="p2-project__body">
         <div className="p2-project__media">
           {project.media === "horizon" && <HorizonShot />}
@@ -201,19 +203,15 @@ function Project({ project, summary }) {
             ))}
           </dl>
 
-          <h3 className="p2-section-label">Key decisions</h3>
-          <ul className="p2-decisions">
-            {project.decisions.map(([decision, why]) => (
-              <li key={decision}><b>{decision}</b> {why}</li>
+          <h3 className="p2-section-label">Challenges &amp; decisions</h3>
+          <ol className="p2-decisions">
+            {project.decisions.map(([decision, why], index) => (
+              <li key={decision}><span className="p2-decision-number" aria-hidden="true">0{index + 1}</span><div><h4>{decision}</h4><p>{why}</p></div></li>
             ))}
-          </ul>
-
-          {project.live
-            ? <LiveCounts summary={summary} />
-            : <p className="p2-result">{project.result}</p>}
+          </ol>
 
           <details className="p2-case">
-            <summary>Read the full case study</summary>
+            <summary>Read the technical detail</summary>
             {project.caseStudy.map(([label, text]) => (
               <div key={label}><h4>{label}</h4><p>{text}</p></div>
             ))}
@@ -245,7 +243,7 @@ export default function ProjectsPage2() {
       <section className="p2-intro">
         <p className="p2-eyebrow">Selected work · 2013–present</p>
         <h1>Real processes.<br />Better systems.</h1>
-        <p className="p2-lede">Three systems, each built by first understanding how the work actually moves. Every project starts with the decisions that shaped it; the full case study is one tap away.</p>
+        <p className="p2-lede">Three systems built around the people doing the work. The problems they faced, what I delivered, and the challenges and decisions that shaped each result.</p>
       </section>
 
       <section className="p2-projects" aria-label="Major projects">
