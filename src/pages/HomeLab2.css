@@ -17,6 +17,11 @@
 .lab2__workflow-labels > span + span { margin-left: 10px; }
 .lab2__workflow-labels small { color: var(--accent); font-size: 8px; line-height: 18px; }
 .lab2__flow-lines { position: absolute; top: 60px; bottom: 28px; width: 100%; height: calc(100% - 88px); fill: none; stroke: rgb(159 195 238 / 65%); stroke-width: .35; }
+.lab2__diagram--1 .lab2__flow-lines { stroke: rgb(159 195 238 / 22%); stroke-dasharray: 1.5 2; }
+.lab2__diagram--1 .lab2__held-path { stroke: rgb(240 183 95 / 45%); }
+.lab2__workflow-legend { position: absolute; top: 72px; left: 0; right: 0; display: grid; grid-template-columns: repeat(3, 1fr); text-align: center; color: #a9bbd0; font-size: 8px; }
+.lab2__held-label { position: absolute; left: 52%; top: calc(79% + 2px); transform: translateX(-50%); color: #f0b75f; font-size: 8px; white-space: nowrap; padding: 3px 5px; border: 1px dashed rgb(240 183 95 / 38%); border-radius: 4px; }
+.lab2__diagram--1 .lab2__diagram-note { font-size: 8px; }
 .lab2__weekdays { position: absolute; top: 30px; left: 0; right: 0; display: grid; grid-template-columns: repeat(7, 1fr); text-align: center; color: #c4d4e8; font-size: 9px; }
 .lab2__calendar { position: absolute; inset: 54px 0 28px; display: grid; grid-template-columns: repeat(7, 1fr); grid-template-rows: repeat(5, 1fr); border-top: 1px solid rgb(159 195 238 / 24%); border-left: 1px solid rgb(159 195 238 / 24%); }
 .lab2__calendar > span { border-right: 1px solid rgb(159 195 238 / 24%); border-bottom: 1px solid rgb(159 195 238 / 24%); }

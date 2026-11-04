@@ -47,8 +47,10 @@ function FormationGuide({ stop, area }) {
       <figcaption><span>{stop === 1 ? "Connected workflow" : stop === 2 ? "One shared calendar" : "A shared place to connect"}</span><small>Illustration</small></figcaption>
       {stop === 1 && <>
         <div className="lab2__workflow-labels">{["Intake", "Review", "Release"].map((label, index) => <span key={label}><small>0{index + 1}</small>{label}</span>)}</div>
-        <svg className="lab2__flow-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M 5 50 H 95" /><path d="M 31 47 L 34 50 L 31 53 M 65 47 L 68 50 L 65 53" /></svg>
-        <p className="lab2__diagram-note">Separate tools → connected work</p>
+        <svg className="lab2__flow-lines" viewBox="0 0 100 100" preserveAspectRatio="none" aria-hidden="true"><path d="M 8 50 H 92" /><path d="M 31 47 L 34 50 L 31 53 M 65 47 L 68 50 L 65 53" /><path className="lab2__held-path" d="M 52 50 V 79" /></svg>
+        <span className="lab2__held-label">Needs checking</span>
+        <div className="lab2__workflow-legend"><span>Scattered arrivals</span><span>Check &amp; resolve</span><span>Checked records</span></div>
+        <p className="lab2__diagram-note">Illustrative workflow · not a replica of TCEQ’s process</p>
       </>}
       {stop === 2 && <>
         <div className="lab2__weekdays">{WEEKDAYS.map((day) => <span key={day}>{day}</span>)}</div>

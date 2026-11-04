@@ -5,6 +5,7 @@ import * as THREE from "three";
 import { GROUP_DEFS, MAX_REAL_LIGHTS, groupCount, groupLitRatio } from "./orbFieldConfig";
 import { areaToBox, formationTarget, prepareFormations } from "./labFormations";
 import "./OrbField.css";
+import WorkflowRecords from "./WorkflowRecords";
 
 // Warm firelight that lit orbs blend toward during the "gathering" stop.
 const WARM_LIGHT = new THREE.Color("#ff9a3c");
@@ -606,6 +607,8 @@ function MotionController({ groups, enabled, stirSignal, interactionRef, formati
   }, [items, stirSignal]);
 
   useFrame((state, frameDelta) => {
+    // The records scene has its own controller; suspend the hidden orb field.
+    if (formationState?.requested === 1) return;
     if (!enabled) {
       if (formationState?.box) {
         pausedTimeRef.current ??= state.clock.elapsedTime;
@@ -829,7 +832,7 @@ function DriftGroup({ mobile, reducedMotion, interactionRef, formation, children
     groupRef.current.rotation.z = -drag * 0.09;
   });
   return (
-    <group ref={groupRef} position={[mobile ? 0 : 2.1, mobile ? 0.6 : 0, 0]}>
+    <group ref={groupRef} visible={formation !== 1} position={[mobile ? 0 : 2.1, mobile ? 0.6 : 0, 0]}>
       {children}
     </group>
   );
@@ -926,8 +929,9 @@ function OrbScene({ mobile, reducedMotion, progress, orbProgress, motion, stirSi
 
   return (
     <>
-      <BackWall progressRef={progressRef} mobile={mobile} />
-      <AdaptiveSceneLight progressRef={progressRef} interactionRef={interactionRef} />
+      {formation !== 1 && <BackWall progressRef={progressRef} mobile={mobile} />}
+      {formation !== 1 && <AdaptiveSceneLight progressRef={progressRef} interactionRef={interactionRef} />}
+      {formation === 1 && <WorkflowRecords area={formationArea} mobile={mobile} paused={!motion} reducedMotion={reducedMotion} />}
       <DriftGroup mobile={mobile} reducedMotion={reducedMotion || !motion} interactionRef={interactionRef} formation={formation}>
         <MotionController groups={groups} enabled={motion && !reducedMotion} stirSignal={stirSignal} interactionRef={interactionRef} formationState={formationState} />
         <LightBulbs items={bulbs} limit={spillLightLimit} reducedMotion={reducedMotion} progressRef={progressRef} interactionRef={interactionRef} formationState={formationState} />
