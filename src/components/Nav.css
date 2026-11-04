@@ -75,6 +75,7 @@
 
 .site-nav__resume b { margin-left: 5px; font-weight: 700; }
 .site-nav__menu { display: none; }
+.site-nav__profiles { display: flex; gap: 16px; }
 
 @media (max-width: 1000px) {
   .site-nav__brand small { display: none; }
@@ -120,6 +121,8 @@
   .site-nav__links a { width: 100%; padding: 11px 0; font-size: 15px; }
   .site-nav__links .is-active::after { display: none; }
   .site-nav__links .site-nav__resume { width: auto; margin-top: 8px; padding: 10px 16px; }
+  .site-nav__profiles { display: flex; width: 100%; gap: 24px; margin-top: 8px; padding-top: 12px; border-top: 1px solid rgb(255 255 255 / 12%); }
+  .site-nav__profiles a { width: auto; font-size: 12px; }
 
 }
 
